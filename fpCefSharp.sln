@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30517.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fpCefSharp", "fpCefSharp\fpCefSharp.csproj", "{A23B3E63-8CE9-45F7-9070-F9D3FE708B58}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A23B3E63-8CE9-45F7-9070-F9D3FE708B58}.Debug|x86.ActiveCfg = Debug|x86
+		{A23B3E63-8CE9-45F7-9070-F9D3FE708B58}.Debug|x86.Build.0 = Debug|x86
+		{A23B3E63-8CE9-45F7-9070-F9D3FE708B58}.Release|x86.ActiveCfg = Release|x86
+		{A23B3E63-8CE9-45F7-9070-F9D3FE708B58}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BF62EF75-6ED0-4C5C-A0BC-B7DF7ABF2449}
+	EndGlobalSection
+EndGlobal
