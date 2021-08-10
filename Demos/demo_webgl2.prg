@@ -1,10 +1,6 @@
 *========================================================================================
-* Displaying a PDF file
+* WebGL demo #1
 *========================================================================================
 
-	Local lcPdf
-	lcPdf = FullPath ("Files/Wollenhaupt_Browser.Pdf")
-	lcPdf = "file://" + Chrtran (m.lcPdf, "\", "/")
-	
-	Do form ShowHtml with m.lcPdf
-
+	DO FORM ShowHtml.Scx ;
+		WITH "https://alteredqualia.com/xg/examples/sunshine.html"

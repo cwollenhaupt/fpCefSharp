@@ -1,6 +1,5 @@
 *========================================================================================
-* webRTC demo
+* A rich text editor
 *========================================================================================
 
-	Do form ShowHtml.scx ;
-		with "https://webrtc.github.io/samples/src/content/getusermedia/gum/"
+	DO FORM ShowHtml.Scx WITH "https://quilljs.com/"

@@ -1,5 +1,5 @@
 *========================================================================================
-* Display an external web site
+* WebGL demo #1
 *========================================================================================
 
-	Do form ShowHtml.scx with "http://www.foxpert.com"
+	DO FORM ShowHtml.Scx WITH "https://webglsamples.org/aquarium/aquarium.html"
