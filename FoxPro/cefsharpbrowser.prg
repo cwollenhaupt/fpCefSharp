@@ -62,6 +62,7 @@ Function GetCefSharpPath
 	laSupportedVersion[2] = "cef-bin-v75.1.142"	
 	laSupportedVersion[3] = "cef-bin-v79.1.360"
 	laSupportedVersion[4] = "cef-bin-v84.4.10"
+	laSupportedVersion[4] = "cef-bin-v91.1.230"
 	
 	*--------------------------------------------------------------------------------------
 	* CefSharp is located in a sub folder. We are looking for the highest available 
@@ -207,15 +208,15 @@ Procedure BindToHost (toHost, tcAddress, toConfig)
 	loBrowser = null
 	Declare Sleep in Win32Api Long
 	ltStart = Datetime ()
-	Do while not loChromium.IsBrowserInitialized
+	Do while not loBridge.GetProperty (m.loChromium, "IsBrowserInitialized")
 		If Datetime() > ltStart+5
 			EventLog ("cefsharp.bind-to-host.browser-timeout")
 			Exit
 		EndIf
 		Sleep (50)
 	EndDo
-	If loChromium.IsBrowserInitialized
-		loBrowser = loChromium.GetBrowser ()
+	If loBridge.GetProperty (m.loChromium, "IsBrowserInitialized")
+		loBrowser = loBridge.InvokeMethod (m.loChromium, "GetBrowser")
 	EndIf
 	
 	*--------------------------------------------------------------------------------------
@@ -233,7 +234,7 @@ Procedure BindToHost (toHost, tcAddress, toConfig)
 			,m.loBrowser ;
 			,This ;
 		)
-		loChromium.Load (m.tcAddress)
+		loBridge.InvoikeMethod (m.loChromium, "Load", m.tcAddress)
 	EndIf
 	
 	*--------------------------------------------------------------------------------------
@@ -287,8 +288,6 @@ Procedure GlobalInit (toBridge)
 	This.RegisterSchemaHandlers (m.toBridge, m.loCefSettings)
 	This.SetLanguage (m.toBridge, m.loCefSettings)
 	loCefCommandLineArgs = toBridge.GetProperty(loCefSettings, "CefCommandLineArgs")
-	toBridge.InvokeMethod (m.loCefCommandLineArgs, "Remove", "enable-system-flash")
-	toBridge.InvokeMethod (m.loCefCommandLineArgs, "Add", "enable-system-flash", "1")	
 	toBridge.InvokeMethod (m.loCefCommandLineArgs, "Add", "enable-media-stream", "1")
 	toBridge.InvokeMethod (m.loCefCommandLineArgs, "Add", ;
 		"--use-fake-ui-for-media-stream", "1")
@@ -826,18 +825,19 @@ Procedure OnProcessRequestProperty (tcFileName, toResourceHandler, toRequest)
 	loBridge.SetProperty (toResourceHandler, "Stream", m.loStream)
 	loBridge.SetProperty (toResourceHandler, "AutoDisposeStream", .T.)
 		
-* ========================================================================================
+*=========================================================================================
 * Reload the current page.
 * 
-* toHost is fpFotNet.DotNetContainer
-* ========================================================================================
-PROCEDURE Reload(toHost)
+* toHost is fpDotNet.DotNetContainer
+*=========================================================================================
+PROCEDURE Reload (toHost)
 
-	* -------------------------------------------------------------------------------------
-	* Verify browser object
-	* -------------------------------------------------------------------------------------
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
 	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
-		ASSERT Vartype( this.oChromium ) = T_OBJECT
+		Assert Vartype (m.toHost) == T_OBJECT
+		Assert Vartype (this.oChromium) = T_OBJECT
 	#ENDIF	
 
 	*--------------------------------------------------------------------------------------
@@ -854,8 +854,6 @@ PROCEDURE Reload(toHost)
 	loBrowserControl = loBridge.InvokeMethod (this.oChromium, "GetBrowser")
 	loBridge.InvokeMethod(loBrowserControl, "Reload", .F.)
 
-ENDPROC 
-	
 *========================================================================================
 * Returns the cefSharp version that we are using.
 *========================================================================================
