@@ -679,20 +679,21 @@ Procedure CallOnProcessRequest (toHandler, tcMethod, toResourceHandler, toReques
 	* ANSI code page and VFP handles to the conversion to Unicode.
 	*--------------------------------------------------------------------------------------
 	Local loStream
-	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
-		Assert Left (m.loData.MimeType, 5) == "text/"
-	#ENDIF
-	If Empty (m.loData.Response)
+	Do case 
+	CASE EMPTY(m.loData.Response)
 		loStream = null
-	Else
+	Case Vartype (m.loData.Response) == T_CHARACTER
 		loStream = loBridge.InvokeStaticMethod ("CefSharp.ResourceHandler" ;
 			,"GetMemoryStream" ;
-			,loData.Response ;
+			,m.loData.Response ;
 			,loBridge.GetEnumValue ("System.Text.Encoding.UTF8") ;
 			,.T. ;
 		)
-		loBridge.SetProperty (m.loStream, "Position", 0)
-	EndIf
+	Case Vartype (m.loData.Response) == T_VARBINARY
+		loStream = loBridge.CreateInstance ("System.IO.MemoryStream", m.loData.Response)
+	OTHERWISE
+		loStream = null
+	EndCase
 	
 	*--------------------------------------------------------------------------------------
 	* Send the response to the browser.
