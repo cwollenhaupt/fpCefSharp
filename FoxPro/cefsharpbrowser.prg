@@ -234,7 +234,7 @@ Procedure BindToHost (toHost, tcAddress, toConfig)
 			,m.loBrowser ;
 			,This ;
 		)
-		loBridge.InvoikeMethod (m.loChromium, "Load", m.tcAddress)
+		loBridge.InvokeMethod (m.loChromium, "Load", m.tcAddress)
 	EndIf
 	
 	*--------------------------------------------------------------------------------------
