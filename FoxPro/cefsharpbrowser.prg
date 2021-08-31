@@ -54,15 +54,15 @@ Function GetCefSharpPath
 	lcRoot = Addbs (m.lcRoot)
 	
 	*--------------------------------------------------------------------------------------
-	* These are all supported versions of the CefSharp browser. The cefSharp team only
-	* releases the odd version numbers of the Chromium browser.
+	* These are all supported versions of the CefSharp browser.
 	*--------------------------------------------------------------------------------------
-	Local laSupportedVersion[4]
+	Local laSupportedVersion[5]
 	laSupportedVersion[1] = "cef-bin-v65"
 	laSupportedVersion[2] = "cef-bin-v75.1.142"	
 	laSupportedVersion[3] = "cef-bin-v79.1.360"
 	laSupportedVersion[4] = "cef-bin-v84.4.10"
 	laSupportedVersion[4] = "cef-bin-v91.1.230"
+	laSupportedVersion[5] = "cef-bin-v92.0.260"
 	
 	*--------------------------------------------------------------------------------------
 	* CefSharp is located in a sub folder. We are looking for the highest available 
