@@ -284,6 +284,7 @@ Procedure GlobalInit (toBridge)
 		loCefSettings.BrowserSubprocessPath = m.lcPath + "CefSharp.BrowserSubprocess.exe"
 	Else
 		loCefSettings = toBridge.CreateInstance("CefSharp.WinForms.CefSettings")
+		This.CheckDpiAwareness (m.toBridge, m.loCefSettings)
 	EndIf
 	This.RegisterSchemaHandlers (m.toBridge, m.loCefSettings)
 	This.SetLanguage (m.toBridge, m.loCefSettings)
@@ -323,6 +324,59 @@ Function DotNet (toHost)
 	
 Return m.loBridge
 
+*========================================================================================
+* VFP9 is not DPI aware as aren't most VFP applications. Therefore Windows runs them
+* sandboxed pretending that the resolution is lower than it actually is and scaling
+* everything accordingly.
+*
+* CefSharp uses an out-of-process application for rendering and GPU activities. These
+* have to match the settings of our own process. Because DPI awareness is configured
+* through an application manifest that is embedded into the EXE, we created a copy of
+* the CefSharp.BrowserSubProcess.EXE. Currently we distiguish two situations:
+*
+* VFP is not DPI aware (shown in Task Manager as "unaware"). We use our DPI unware
+* implementation of the BrowserSubProcess.
+*
+* VFP is DPI aware. Regardless of whether that is System, per Monitor or per Monitor v2, 
+* we always use the default option provided by CefSharp.
+*
+* If you change DPI awareness in your application programmatically, you have to do so
+* before calling fpCefSharp.
+*========================================================================================
+Procedure CheckDpiAwareness (toBridge, toSettings)
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.toBridge) == T_OBJECT
+		Assert Vartype (m.toSettings) == T_OBJECT
+	#ENDIF
+	
+	*--------------------------------------------------------------------------------------
+	* If this process is DPI aware, we use the default
+	*--------------------------------------------------------------------------------------
+	DECLARE long IsProcessDPIAware IN Win32Api 
+	If isProcessDPIAware () != 0
+		Return
+	EndIf
+	
+	*--------------------------------------------------------------------------------------
+	* If we don't have a DPI unware sub process, we can't do anything either. This could
+	* happen when older releases of CefSharp are mixed with later releases of fpCefSharp.
+	*--------------------------------------------------------------------------------------
+	Local lcPath, lcExe
+	lcPath = This.GetCefSharpPath ()
+	lcExe = Addbs (m.lcPath) + "CefSharp.BrowserSubprocess.dpiunaware.exe"
+	If Empty (Sys (2000, m.lcExe))
+		Return
+	EndIf
+	
+	*--------------------------------------------------------------------------------------
+	* Otherwise we use the DPI unaware process.
+	*--------------------------------------------------------------------------------------
+	toBridge.SetProperty (m.toSettings, "BrowserSubprocessPath", m.lcExe)
+	
 *========================================================================================
 * We register our own scheme handler. This makes it possible to load an HTML document 
 * without first creating a temporary file and use the file:// prototocol. This is 
