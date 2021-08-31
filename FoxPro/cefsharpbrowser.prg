@@ -277,9 +277,10 @@ Procedure GlobalInit (toBridge)
 	*--------------------------------------------------------------------------------------
 	* Initialize Cef. 
 	*--------------------------------------------------------------------------------------
-	Local loCefSettings, loCefCommandLineArgs
+	Local loCefSettings, loCefCommandLineArgs, lcPath
 	If m.lcVersion == "cef-bin-v65"
 		loCefSettings = toBridge.CreateInstance("CefSharp.CefSettings")
+		lcPath = Addbs (This.GetCefSharpPath ())
 		loCefSettings.ResourcesDirPath = m.lcPath
 		loCefSettings.BrowserSubprocessPath = m.lcPath + "CefSharp.BrowserSubprocess.exe"
 	Else
