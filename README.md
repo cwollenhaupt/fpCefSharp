@@ -20,3 +20,10 @@ fpCefSharp relies on the following projects:
 - [CefSharp](https://github.com/cefsharp/CefSharp)
 - [wwDotNetBridge](https://github.com/RickStrahl/wwDotnetBridge)
 - [fpDotNet](https://github.com/cwollenhaupt/fpDotNet)
+
+### Breaking Changes
+Visual C++ 2019 is used to build CefSharp in version v93 any beyond due to a change originating at Google. Clients must install the latest VC++ runtime to use any version later than v92.0.260. Microsoft provides the latest runtime for x86 systems [here](https://aka.ms/vs/17/release/vc_redist.x86.exe). 
+
+fpCefSharp verifies which VC++ runtime is installed on a client. Without an appropriate runtime only CefSharp versions up to v92.0.260 are considered. You can disable this behavior by setting the lCheckRuntime property to .F. If you support clients with and without VC++ 2019 runtimes, you must deploy the current version of fpCefSharp as well as the cef-bin folder for version v92.0.260 or any previous one. Not running the latest version of CefSharp is a security risk and might make your application vulnerable to web browser exploits.
+
+If you subclassed fpCefSharp and overrode the GetCefSharpPath to change how fpCefSharp locates CefSharp, then please be advised that the method now receives a toHost parameter. You are free to ignore the value, but your subclass must have a corresponding LParameters statement to receive the value.

@@ -29,6 +29,12 @@ Define Class CefSharpBrowser as Custom
 	oConfig = null
 	
 	*--------------------------------------------------------------------------------------
+	* Make sure we only load CefSharp releases that are supported by the runtimes installed
+	* on the local machine.
+	*--------------------------------------------------------------------------------------
+	lCheckRuntime = .T.
+	
+	*--------------------------------------------------------------------------------------
 	* Internal properties. Ensures that BindToHost is never called more than once per
 	* instance. We avoid repeated calls by maintaining a .NET Bridge instance that is 
 	* bound to the AppDomain of the InterOp layer.
@@ -39,8 +45,18 @@ Define Class CefSharpBrowser as Custom
 *========================================================================================
 * Returns the cefSharp folder with the highest supported and installed version of 
 * cefSharp. We always return a path, even when it doesn't exist.
+*
+* The first time we call GetCefSharpPath we must pass a host, so that we can execute
+* code in the AppDomain of the browser control. Calling BindToHost takes care of this.
 *========================================================================================
-Function GetCefSharpPath
+Function GetCefSharpPath (toHost)
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.toHost) $ T_OBJECT + T_OPTIONAL
+	#ENDIF
 
 	*--------------------------------------------------------------------------------------
 	* specify the program folder.
@@ -52,28 +68,42 @@ Function GetCefSharpPath
 		lcRoot = JustPath(_VFP.ServerName)
 	ENDIF
 	lcRoot = Addbs (m.lcRoot)
+
+	*--------------------------------------------------------------------------------------
+	* CefSharp v93 requires at least the VC++ 2019 runtime. We determine what runtimes 
+	* are installed: vc2015, vc2019.
+	*--------------------------------------------------------------------------------------
+	Local lcRuntime
+	lcRuntime = This.GetInstalledVcRuntime (m.toHost)
 	
 	*--------------------------------------------------------------------------------------
-	* These are all supported versions of the CefSharp browser.
+	* These are all supported versions of the CefSharp browser and the supported VC++
+	* runtimes.
 	*--------------------------------------------------------------------------------------
-	Local laSupportedVersion[5]
-	laSupportedVersion[1] = "cef-bin-v65"
-	laSupportedVersion[2] = "cef-bin-v75.1.142"	
-	laSupportedVersion[3] = "cef-bin-v79.1.360"
-	laSupportedVersion[4] = "cef-bin-v84.4.10"
-	laSupportedVersion[4] = "cef-bin-v91.1.230"
-	laSupportedVersion[5] = "cef-bin-v92.0.260"
+	Local laSupportedVersion[7]
+	laSupportedVersion[1] = "cef-bin-v65 vc2015/vc2019"
+	laSupportedVersion[2] = "cef-bin-v75.1.142 vc2015/vc2019"
+	laSupportedVersion[3] = "cef-bin-v79.1.360 vc2015/vc2019"
+	laSupportedVersion[4] = "cef-bin-v84.4.10 vc2015/vc2019"
+	laSupportedVersion[5] = "cef-bin-v91.1.230 vc2015/vc2019"
+	laSupportedVersion[6] = "cef-bin-v92.0.260 vc2015/vc2019"
+	laSupportedVersion[7] = "cef-bin-v97.1.61 vc2019"
 	
 	*--------------------------------------------------------------------------------------
 	* CefSharp is located in a sub folder. We are looking for the highest available 
 	* version. If we can't find a version, we return the the path of the oldest supported
-	* version.
+	* version. We limit our search to those versions of CefSharp supported by the 
+	* VC runtime that is installed on the machine.
 	*--------------------------------------------------------------------------------------
-	Local lcPath, lnVersion
+	Local lcPath, lnVersion, lcSupported
 	For lnVersion = Alen (laSupportedVersion, ALEN_LINES) to 1 step -1
-		lcPath = m.lcRoot + laSupportedVersion[m.lnVersion]
-		If Directory (m.lcPath, 1)
-			Exit
+		lcPath = m.lcRoot + GetWordNum (laSupportedVersion[m.lnVersion], 1)
+		lcSupported = GetWordNum (laSupportedVersion[m.lnVersion], 2)
+		If    m.lcRuntime $ m.lcSupported ;
+		   or not This.lCheckRuntime 
+			If Directory (m.lcPath, 1)
+				Exit
+			EndIf
 		EndIf
 	EndFor
 	
@@ -86,7 +116,65 @@ Function GetCefSharpPath
 	#ENDIF
 	
 Return m.lcPath
+
+*========================================================================================
+* Returns the installed VC++ runtime (vc2015, vc2019). To remain backward compatible
+* with previous releases of cefSharpBrowser we return vc2015 whenever we can't find any
+* later runtime without actually checking if the runtime is installed.
+*========================================================================================
+Procedure GetInstalledVcRuntime (toHost)
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.toHost) $ T_OBJECT + T_OPTIONAL
+	#ENDIF
+
+	*--------------------------------------------------------------------------------------
+	* VC2015, VC2017, VC2019 and VC2022 share the same runtime library. That is, the
+	* library is backward compatible with the latest installed one being the one that is
+	* used. VcRedist.exe updates the registry to indicate which version is installed
+	* on the machine.
+	*
+	* We pass NULL instead of a default value to GetValue, because GetValue returns NULL
+	* if the key doesn't exist (ie. the runtime is not installed at all). GetValue only
+	* returns the default value if the key exists, but the value doesn't.
+	*--------------------------------------------------------------------------------------
+	Local lcVersion, loBridge
+	loBridge = This.DotNet (m.toHost)
+	lcVersion = loBridge.InvokeStaticMethod ( ;
+		 "Microsoft.Win32.Registry", "GetValue" ;
+		,"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\DevDiv\VC\Servicing\14.0\RuntimeMinimum" ;
+		,"Version" ;
+		,null ;
+	)
+	lcVersion = Nvl (m.lcVersion, "00.00.00")
 	
+	*--------------------------------------------------------------------------------------
+	* Parse major and minor version
+	*--------------------------------------------------------------------------------------
+	Local lcMajor, lcMinor
+	lcMajor = GetWordNum (m.lcVersion, 1, ".")
+	lcMinor = GetWordNum (m.lcVersion, 2, ".")
+	
+	*--------------------------------------------------------------------------------------
+	* Currently we only distinguish between vc2015 and vc2019. For newer runtimes such as
+	* VC 2022 we still return vc2019 until a future version of CefSharp actually requires
+	* this as a minimum version.
+	*--------------------------------------------------------------------------------------
+	Local lcVersion
+	Do case
+	Case Val (m.lcMajor) > 14
+		lcVersion = "vc2019"
+	Case Val (m.lcMajor) = 14 and Val (m.lcMinor) >= 20
+		lcVersion = "vc2019"  && 14.20 is VC 2019 with multiple release up to 14.29.
+	Otherwise 
+		lcVersion = "vc2015"
+	EndCase
+
+Return m.lcVersion
+
 *========================================================================================
 * Returns .T. if the cefSharp browser is available. This is the case when the application
 * folder contains a cef-bin-vNNN subfolder. NN is the version that is used.
@@ -166,7 +254,7 @@ Procedure BindToHost (toHost, tcAddress, toConfig)
 	* Load assemblies. 
 	*--------------------------------------------------------------------------------------
 	Local lcPath, llOK
-	lcPath = Addbs (This.GetCefSharpPath ())
+	lcPath = Addbs (This.GetCefSharpPath (m.toHost))
 	loBridge.LoadAssembly (m.lcPath + "CefSharp.dll")
 	loBridge.LoadAssembly (m.lcPath + "CefSharp.Core.dll")
 	loBridge.LoadAssembly (m.lcPath + "CefSharp.WinForms.dll")	
