@@ -240,7 +240,7 @@ Name = "frmShowHtml"
 *========================================================================================
 * Displays an HTML document
 *========================================================================================
-LParameter tcUrl, toConfig
+LParameter tcUrl, toConfig, toEvents
 
 	*--------------------------------------------------------------------------------------
 	* Assertions
@@ -251,11 +251,17 @@ LParameter tcUrl, toConfig
 	#ENDIF
 	
 	*--------------------------------------------------------------------------------------
-	* Wir fügen eine Referenz auf dieses Formular zum Config-Objekt hinzu, damit wir die
-	* Queue ansteuern können, wenn wir Daten verarbeiten.
+	* 
 	*--------------------------------------------------------------------------------------
 	If Vartype (m.toConfig) == T_OBJECT
 		AddProperty (m.toConfig, "oForm", Thisform)
+	EndIf
+	
+	*--------------------------------------------------------------------------------------
+	* We add this form's reference to the event object. 
+	*--------------------------------------------------------------------------------------
+	If Vartype (m.toEvents) == T_OBJECT
+		AddProperty (m.toEvents, "oForm", Thisform)
 	EndIf
 
 	*--------------------------------------------------------------------------------------
@@ -279,6 +285,14 @@ PROCEDURE Release
 *========================================================================================
 
 	This.RemoveFormReference ()
+
+ENDPROC
+PROCEDURE reload
+*========================================================================================
+* Reloads the current document
+*========================================================================================
+
+	This.oCefSharpBrowser.Reload (This.oleBrowser)
 
 ENDPROC
 PROCEDURE removeformreference
@@ -314,6 +328,7 @@ ENDPROC
 		<reserved2/>
 		<reserved3><![CDATA[ocefsharpbrowser
 *removeformreference 
+*reload 
 ]]></reserved3>
 		<reserved4/>
 		<reserved5/>
@@ -397,6 +412,48 @@ ENDPROC
 	</form>
 	<form>
 		<platform>WINDOWS</platform>
+		<uniqueid>_6A10ZFVB5</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[commandbutton]]></class>
+		<classloc/>
+		<baseclass><![CDATA[commandbutton]]></baseclass>
+		<objname><![CDATA[cmdExample1]]></objname>
+		<parent><![CDATA[frmShowHtml]]></parent>
+		<properties><![CDATA[Top = 405
+Left = 5
+Height = 27
+Width = 84
+Caption = "Example 1"
+Name = "cmdExample1"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE Click
+*========================================================================================
+* Execute example 1
+*========================================================================================
+
+	Thisform.oCefSharpBrowser.oConfig.Example (Thisform, 1)
+
+
+
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+		<nrecno>8</nrecno>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
 		<uniqueid>_5VH0P16FP</uniqueid>
 		<timestamp>0</timestamp>
 		<class><![CDATA[olecontrol]]></class>
@@ -406,7 +463,7 @@ ENDPROC
 		<parent><![CDATA[frmShowHtml]]></parent>
 		<properties><![CDATA[Top = 30
 Left = 5
-Height = 405
+Height = 370
 Width = 850
 Anchor = 15
 Name = "oleBrowser"
@@ -414,7 +471,7 @@ Name = "oleBrowser"
 		<protected/>
 		<methods/>
 		<objcode/>
-		<ole><![CDATA[0M8R4KGxGuEAAAAAAAAAAAAAAAAAAAAAPgADAP7/CQAGAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAAEAAAAgAAAAEAAAD+////AAAAAAAAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9/////v////7////+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////1IAbwBvAHQAIABFAG4AdAByAHkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAUA//////////8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAKmiu32NgBAwAAAAACAAAAAAAAAwBPAGwAZQBPAGIAagBlAGMAdABEAGEAdABhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AAgEDAAAAAgAAAP////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAagEAAAAAAAADAEEAYwBjAGUAcwBzAE8AYgBqAFMAaQB0AGUARABhAHQAYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJgACAP///////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA4AAAAAAAAAAMAQwBoAGEAbgBnAGUAZABQAHIAbwBwAHMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcAAIA////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAwAAAP7////+////BAAAAAUAAAAGAAAABwAAAP7///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+XW3OtFLqjSbMmNNjxBYtzAAEAAAD/////AQAAAAAAAAAEAQAAABxTeXN0ZW0uQ29sbGVjdGlvbnMuSGFzaHRhOAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABibGUHAAAACkxvYWRGYWN0b3IHVmVyc2lvbghDb21wYXJlchBIYXNoQ29kZVByb3ZpZGVyCEhhc2hTaXplBEtleXMGVmFsdWVzAAADAwAFBQsIHFN5c3RlbS5Db2xsZWN0aW9ucy5JQ29tcGFyZXIkU3lzdGVtLkNvbGxlY3Rpb25zLklIYXNoQ29kZVByb3ZpZGVyCOxROD8FAAAACgoHAAAACQIAAAAJAwAAABACAAAABAAAAAYEAAAABE5hbWUGBQAAAAhUYWJJbmRleAYGAAAABFNpemUGBwAAAAhMb2NhdGlvbhADAAAABAAAAAYIAAAAFUNvbnRyb2xBeFNvdXJjaW5nU2l0ZQYJAAAAATAGCgAAAAg4NTAsIDQwNQYLAAAABDAsIDALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==]]></ole>
+		<ole><![CDATA[0M8R4KGxGuEAAAAAAAAAAAAAAAAAAAAAPgADAP7/CQAGAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAAEAAAAgAAAAEAAAD+////AAAAAAAAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9/////v////7////+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////1IAbwBvAHQAIABFAG4AdAByAHkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAUA//////////8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJCzpa6h3NgBAwAAAAACAAAAAAAAAwBPAGwAZQBPAGIAagBlAGMAdABEAGEAdABhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AAgEDAAAAAgAAAP////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAagEAAAAAAAADAEEAYwBjAGUAcwBzAE8AYgBqAFMAaQB0AGUARABhAHQAYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJgACAP///////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA4AAAAAAAAAAMAQwBoAGEAbgBnAGUAZABQAHIAbwBwAHMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcAAIA////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAwAAAP7////+////BAAAAAUAAAAGAAAABwAAAP7///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+XW3OtFLqjSbMmNNjxBYtzAAEAAAD/////AQAAAAAAAAAEAQAAABxTeXN0ZW0uQ29sbGVjdGlvbnMuSGFzaHRhOAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABibGUHAAAACkxvYWRGYWN0b3IHVmVyc2lvbghDb21wYXJlchBIYXNoQ29kZVByb3ZpZGVyCEhhc2hTaXplBEtleXMGVmFsdWVzAAADAwAFBQsIHFN5c3RlbS5Db2xsZWN0aW9ucy5JQ29tcGFyZXIkU3lzdGVtLkNvbGxlY3Rpb25zLklIYXNoQ29kZVByb3ZpZGVyCOxROD8FAAAACgoHAAAACQIAAAAJAwAAABACAAAABAAAAAYEAAAABE5hbWUGBQAAAAhUYWJJbmRleAYGAAAABFNpemUGBwAAAAhMb2NhdGlvbhADAAAABAAAAAYIAAAAFUNvbnRyb2xBeFNvdXJjaW5nU2l0ZQYJAAAAATAGCgAAAAg4NTAsIDM3MAYLAAAABDAsIDALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==]]></ole>
 		<ole2><![CDATA[OLEObject = fpDotNet.DLL
 ]]></ole2>
 		<reserved1/>
@@ -511,6 +568,6 @@ Name = "txtUrl"
 		<reserved7/>
 		<reserved8/>
 		<user/>
-		<nrecno>8</nrecno>
+		<nrecno>9</nrecno>
 	</form>
 </VFPData>

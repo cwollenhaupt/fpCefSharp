@@ -384,6 +384,7 @@ Procedure GlobalInit (toBridge)
 	This.RegisterSchemaHandlers (m.toBridge, m.loCefSettings)
 	This.SetLanguage (m.toBridge, m.loCefSettings)
 	loCefCommandLineArgs = toBridge.GetProperty(loCefSettings, "CefCommandLineArgs")
+	loCefCommandLineArgs = This.UnWrapType (m.toBridge, m.loCefCommandLineArgs)
 	toBridge.InvokeMethod (m.loCefCommandLineArgs, "Add", "enable-media-stream", "1")
 	toBridge.InvokeMethod (m.loCefCommandLineArgs, "Add", ;
 		"--use-fake-ui-for-media-stream", "1")
@@ -1168,7 +1169,7 @@ Procedure HandleEvents (toEvents)
 	*--------------------------------------------------------------------------------------
 	Local loBridge, loSubscription
 	loBridge = This.DotNet ()
-	loSubscription = loBridge.SubscribeToEvents (This.oChromium, m.toEvents)
+	loSubscription = This.Bridge_SubscribeToEvents (m.loBridge, This.oChromium, m.toEvents)
 
 	*--------------------------------------------------------------------------------------
 	* We maintain a collection of all subscriptions, so that we can unsubscribe from all
@@ -1212,6 +1213,183 @@ Procedure HandleTitleChangedEvent (toSender, toEventArgs)
 	* Call the config object
 	*--------------------------------------------------------------------------------------
 	This.oConfig.TitleChangedEvent (m.lcTitle)
-		
+	
+*========================================================================================
+* wwDotNetBridge wraps certain return values in a ComArray.
+*========================================================================================
+Procedure UnWrapType (toBridge, toObject)
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.toBridge) == T_OBJECT
+		Assert Vartype (m.toObject) $ T_OBJECT + T_NULL
+	#ENDIF
+	
+	*--------------------------------------------------------------------------------------
+	* Check for null values here so that we don't have to check them on every call.
+	*--------------------------------------------------------------------------------------
+	If IsNull (m.toObject)
+		Return m.toObject
+	EndIf
+	
+	*--------------------------------------------------------------------------------------
+	* Check if .NET Bridge wrapped the native object with a ComArray.
+	*--------------------------------------------------------------------------------------
+	Local loType, lcName, loUnwrapped
+	loType = m.toObject.GetType ()
+	lcName = toBridge.GetProperty (m.loType, "FullName")
+	If m.lcName == "Westwind.WebConnection.ComArray"
+		loUnwrapped = m.toObject.Instance
+	Else
+		loUnwrapped = m.toObject
+	EndIf
+
+Return m.loUnwrapped
+
+*========================================================================================
+* The following methods are modified versions of the ones found in Rick Strahl's 
+* wwDotNetBridge. They are here as a work around until pull request #26 has been merged.
+*
+* The following changes have been made to this code:
+*
+*  - Changed the name of the EventSubscription class to fpCefSharp_EventSubscription
+*
+*  - Pass in the reference to the wwDotNetBridge instance to replace "this".
+*
+*  - Changed the name and the visibility of the SubscribeToEvents method.
+*
+*========================================================================================
+
+************************************************************************
+*  SubscribeToEvents
+****************************************
+***  Function: Handles all events of a source object for subsequent retrieval by calling WaitForEvent.
+***  loSource: The object for which to subscribe to events.
+***  loHandler: An object with a method OnEvent(loEventName, loParams).
+***  lcPrefix: The initial part of the event handler function for each event. Defaults to "On".
+***    Return: A subscription object. The subscription ends when this object goes out of scope.
+************************************************************************
+Protected FUNCTION Bridge_SubscribeToEvents(toBridge, loSource, loHandler, lcPrefix)
+IF EMPTY(lcPrefix)
+	lcPrefix = "On"
+ENDIF
+LOCAL loSubscription
+loSubscription = CREATEOBJECT("fpCefSharp_EventSubscription")
+loSubscription.Setup(m.toBridge, loSource, loHandler, lcPrefix)
+RETURN loSubscription
+ENDFUNC
+*   SubscribeToEvents
+
 EndDefine
 
+
+*========================================================================================
+* This class is a work around for a wwDotNetBridge limitation. wwDotNetBridge only works
+* if you implement all events which can have unintended side effects and introduce bugs.
+*
+* https://github.com/RickStrahl/wwDotnetBridge/pull/26
+*
+* We can remove this work around if the above pull request is ever accepted by Rick 
+* Strahl. For now we implement our own implementation of the subscriber class that uses
+* the Subscribtion object in fpCefSharp rather than wwDotNetBrisge.
+*
+* This class is based on Edward Brey's contribution to wwDotNetBridge
+* (https://github.com/breyed). This code relies on other classes implemented in 
+* wwDotNetBridge. Therefore wwDotNetBridge must be loaded, before this class can be
+* instantiated.
+* 
+* The following changes were made to Edward's code:
+*
+*   - Changed the name of the class to avoid conflicts with wwDotNetBridge
+*
+*   - Changed the name of the .NET EventSubscriber class to the one implemented in
+*     fpCefSharp.dll
+*
+*   - All changes made in pull request #26 for wwDotNetBridge to implement an extra
+*     check which methods actually exist.
+*
+*========================================================================================
+DEFINE CLASS fpCefSharp_EventSubscription as AsyncCallbackEvents of wwdotnetbridge.prg
+*************************************************************
+*:  Author: Edward Brey  - https://github.com/breyed
+*:  Usage: Used internally by SubscribeToEvents
+************************************************************
+HIDDEN oBridge, oHandler, oSubscriber, oPrefix
+
+oBridge = null
+oHandler = null
+oPrefix = null
+oSubscriber = null
+
+************************************************************************
+*  Setup
+****************************************
+***  Function: Sets up an event subscription. 
+***    Assume:
+***      Pass: loBridge   - dnb instance
+***            loSource   - Source Object fires events
+***            loHandler  - Target Object that handles events
+***            lcPrefix   - prefix for event methods
+***                         implemented on target (defaults to "On")
+************************************************************************
+FUNCTION Setup(loBridge, loSource, loHandler, lcPrefix)
+this.oBridge = loBridge
+this.oHandler = loHandler
+this.oPrefix = lcPrefix
+Private handler
+handler = m.loHandler
+this.oSubscriber = loBridge.CreateInstance("fpCefSharp.fpEventSubscriber", loSource, m.lcPrefix, _Vfp)
+this.HandleNextEvent()
+ENDFUNC
+
+************************************************************************
+*  UnSubscribe
+****************************************
+***  Function: Unsubscribes events that are currently subscribed to
+************************************************************************
+FUNCTION UnSubscribe()
+IF !ISNULL(THIS.oSubscriber)
+	this.oSubscriber.Dispose()
+ENDIF
+ENDFUNC
+ 
+  
+FUNCTION HandleNextEvent()
+this.oBridge.InvokeMethodAsync(this,this.oSubscriber,"WaitForEvent")
+ENDFUNC
+
+************************************************************************
+*  OnComplete
+****************************************
+***  Function: Event Proxy that forwards the event to a function 
+***            named On{Event} with event's parameters.
+************************************************************************
+FUNCTION OnCompleted(lvResult, lcMethod)
+LOCAL loParams,lParamText,lCount
+
+IF ISNULL(lvResult) && If the call to WaitForEvent was canceled:
+	RETURN
+ENDIF
+
+
+loParams=CREATEOBJECT("EMPTY") && Workaround to index into array of parameters. 
+lParamText = ""
+IF NOT ISNULL(lvResult.Params)
+	lCount = 0
+	FOR EACH lParam IN lvResult.Params
+		lCount = lCount + 1
+		AddProperty(loParams,"P" + ALLTRIM(STR(lCount)),lParam)
+		lParamText = lParamText + ",loParams.P" + ALLTRIM(STR(lCount))
+	ENDFOR
+ENDIF
+
+IF VARTYPE(THIS.oHandler) = "O"
+	=EVALUATE("this.oHandler." + this.oPrefix + lvResult.Name + "("+SUBSTR(lParamText,2)+")")
+	this.HandleNextEvent()
+ENDIF
+
+ENDFUNC
+
+ENDDEFINE
