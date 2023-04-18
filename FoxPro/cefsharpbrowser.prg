@@ -1053,12 +1053,16 @@ Procedure Release
 	* If we don't unregister our handler for a browser window, we would hold onto it
 	* until the application shuts down.
 	*--------------------------------------------------------------------------------------
-	loBridge.InvokeStaticMethod ( ;
-		 "fpCefSharp.fpSchemeHandlerFactory" ;
-		,"UnregisterCallback" ;
-		,m.loChromium ;
-		,This ;
-	)
+	Local loBridge, loBrowser
+	loBridge = This.DotNet ()
+	If loBridge.GetProperty (This.oChromium, "IsBrowserInitialized")
+		loBrowser = loBridge.InvokeMethod (This.oChromium, "GetBrowser")
+		loBridge.InvokeStaticMethod ( ;
+			 "fpCefSharp.fpSchemeHandlerFactory" ;
+			,"UnregisterCallback" ;
+			,m.loBrowser ;
+		)
+	EndIf	
 	
 	*--------------------------------------------------------------------------------------
 	* Clear references
