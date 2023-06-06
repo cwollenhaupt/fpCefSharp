@@ -1,0 +1,516 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+	<xsd:schema id="VFPData" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="VFPData" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="form" minOccurs="0" maxOccurs="unbounded">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="platform">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="8"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="uniqueid">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="10"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="timestamp">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:decimal">
+											<xsd:totalDigits value="10"/>
+											<xsd:fractionDigits value="0"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="class">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="classloc">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="baseclass">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="objname">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="parent">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="properties">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="protected">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="methods">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="objcode">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:base64Binary">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="ole">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:base64Binary">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="ole2">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="reserved1">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="reserved2">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="reserved3">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="reserved4">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="reserved5">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="reserved6">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="reserved7">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="reserved8">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="user">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:maxLength value="2147483647"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+								<xsd:element name="nrecno">
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:decimal">
+											<xsd:totalDigits value="10"/>
+											<xsd:fractionDigits value="0"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:element>
+							</xsd:sequence>
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+				<xsd:anyAttribute namespace="http://www.w3.org/XML/1998/namespace" processContents="lax"/>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_5VG0JHYUO</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[dataenvironment]]></class>
+		<classloc/>
+		<baseclass><![CDATA[dataenvironment]]></baseclass>
+		<objname><![CDATA[Dataenvironment]]></objname>
+		<parent/>
+		<properties><![CDATA[Top = 0
+Left = 0
+Width = 0
+Height = 0
+DataSource = .NULL.
+Name = "Dataenvironment"
+]]></properties>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2><![CDATA[1]]></reserved2>
+		<reserved3/>
+		<reserved4><![CDATA[1]]></reserved4>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+		<nrecno>2</nrecno>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_5VG0JHYUP</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[form]]></class>
+		<classloc/>
+		<baseclass><![CDATA[form]]></baseclass>
+		<objname><![CDATA[frmShowHtml]]></objname>
+		<parent/>
+		<properties><![CDATA[Top = 0
+Left = 0
+Height = 440
+Width = 860
+DoCreate = .T.
+Caption = "CefSharp Browser"
+ocefsharpbrowser = .NULL.
+Name = "frmShowHtml"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE Init
+*========================================================================================
+* Displays an HTML document
+*========================================================================================
+LParameter tcUrl, toConfig
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.tcUrl) == T_CHARACTER
+		Assert not Empty (m.tcUrl)
+	#ENDIF
+	
+	*--------------------------------------------------------------------------------------
+	* Wir fügen eine Referenz auf dieses Formular zum Config-Objekt hinzu, damit wir die
+	* Queue ansteuern können, wenn wir Daten verarbeiten.
+	*--------------------------------------------------------------------------------------
+	If Vartype (m.toConfig) == T_OBJECT
+		AddProperty (m.toConfig, "oForm", Thisform)
+	EndIf
+
+	*--------------------------------------------------------------------------------------
+	* Load CefSharp browser and bind to container
+	*--------------------------------------------------------------------------------------
+	This.oCefSharpBrowser = NewObject ("CefSharpBrowser", "CefSharpBrowser.fxp")
+	This.oCefSharpBrowser.BindtoHost (This.oleBrowser, m.tcUrl, m.toConfig)
+
+ENDPROC
+PROCEDURE QueryUnload
+*========================================================================================
+* Remove the reference to this form in the config object
+*========================================================================================
+
+	This.RemoveFormReference ()
+
+ENDPROC
+PROCEDURE Release
+*========================================================================================
+* Remove the reference to this form in the config object
+*========================================================================================
+
+	This.RemoveFormReference ()
+
+ENDPROC
+PROCEDURE removeformreference
+*========================================================================================
+* We add this form as a reference to the config object. Remove the reference here.
+*========================================================================================
+
+	*--------------------------------------------------------------------------------------
+	* Is cefSharpBrowser still available?
+	*--------------------------------------------------------------------------------------
+	If not Vartype (This.oCefSharpBrowser) == T_OBJECT
+		Return 
+	EndIf
+
+	*--------------------------------------------------------------------------------------
+	* Is there a config object?
+	*--------------------------------------------------------------------------------------
+	If not Vartype (This.oCefSharpBrowser.oConfig) == T_OBJECT
+		Return 
+	EndIf 
+	
+	*--------------------------------------------------------------------------------------
+	* Clear reference
+	*--------------------------------------------------------------------------------------
+	This.oCefSharpBrowser.oConfig.oForm = null
+
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3><![CDATA[ocefsharpbrowser
+*removeformreference 
+]]></reserved3>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+		<nrecno>3</nrecno>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_5VG0JHYUR</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[commandbutton]]></class>
+		<classloc/>
+		<baseclass><![CDATA[commandbutton]]></baseclass>
+		<objname><![CDATA[Command1]]></objname>
+		<parent><![CDATA[frmShowHtml]]></parent>
+		<properties><![CDATA[Top = 5
+Left = 750
+Height = 23
+Width = 40
+Anchor = 9
+Caption = "Go"
+Name = "Command1"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE Click
+Thisform.oCefSharpBrowser.Navigate (Alltrim (Thisform.txtUrl.Value))
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+		<nrecno>5</nrecno>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_5VG0JHYUS</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[commandbutton]]></class>
+		<classloc/>
+		<baseclass><![CDATA[commandbutton]]></baseclass>
+		<objname><![CDATA[Command2]]></objname>
+		<parent><![CDATA[frmShowHtml]]></parent>
+		<properties><![CDATA[Top = 5
+Left = 795
+Height = 23
+Width = 60
+Anchor = 9
+Caption = "Reload"
+Name = "Command2"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE Click
+Thisform.oCefSharpBrowser.Reload ()
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+		<nrecno>6</nrecno>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_5VH0P16FP</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[olecontrol]]></class>
+		<classloc/>
+		<baseclass><![CDATA[olecontrol]]></baseclass>
+		<objname><![CDATA[oleBrowser]]></objname>
+		<parent><![CDATA[frmShowHtml]]></parent>
+		<properties><![CDATA[Top = 30
+Left = 5
+Height = 405
+Width = 850
+Anchor = 15
+Name = "oleBrowser"
+]]></properties>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole><![CDATA[0M8R4KGxGuEAAAAAAAAAAAAAAAAAAAAAPgADAP7/CQAGAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAAEAAAAgAAAAEAAAD+////AAAAAAAAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9/////v////7////+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////1IAbwBvAHQAIABFAG4AdAByAHkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAUA//////////8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAKmiu32NgBAwAAAAACAAAAAAAAAwBPAGwAZQBPAGIAagBlAGMAdABEAGEAdABhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AAgEDAAAAAgAAAP////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAagEAAAAAAAADAEEAYwBjAGUAcwBzAE8AYgBqAFMAaQB0AGUARABhAHQAYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJgACAP///////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA4AAAAAAAAAAMAQwBoAGEAbgBnAGUAZABQAHIAbwBwAHMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcAAIA////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAwAAAP7////+////BAAAAAUAAAAGAAAABwAAAP7///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+XW3OtFLqjSbMmNNjxBYtzAAEAAAD/////AQAAAAAAAAAEAQAAABxTeXN0ZW0uQ29sbGVjdGlvbnMuSGFzaHRhOAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABibGUHAAAACkxvYWRGYWN0b3IHVmVyc2lvbghDb21wYXJlchBIYXNoQ29kZVByb3ZpZGVyCEhhc2hTaXplBEtleXMGVmFsdWVzAAADAwAFBQsIHFN5c3RlbS5Db2xsZWN0aW9ucy5JQ29tcGFyZXIkU3lzdGVtLkNvbGxlY3Rpb25zLklIYXNoQ29kZVByb3ZpZGVyCOxROD8FAAAACgoHAAAACQIAAAAJAwAAABACAAAABAAAAAYEAAAABE5hbWUGBQAAAAhUYWJJbmRleAYGAAAABFNpemUGBwAAAAhMb2NhdGlvbhADAAAABAAAAAYIAAAAFUNvbnRyb2xBeFNvdXJjaW5nU2l0ZQYJAAAAATAGCgAAAAg4NTAsIDQwNQYLAAAABDAsIDALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==]]></ole>
+		<ole2><![CDATA[OLEObject = fpDotNet.DLL
+]]></ole2>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+		<nrecno>7</nrecno>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_5VG0JHYUQ</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[textbox]]></class>
+		<classloc/>
+		<baseclass><![CDATA[textbox]]></baseclass>
+		<objname><![CDATA[txtUrl]]></objname>
+		<parent><![CDATA[frmShowHtml]]></parent>
+		<properties><![CDATA[Anchor = 11
+Height = 23
+Left = 5
+SelectOnEntry = .T.
+Top = 5
+Width = 740
+Name = "txtUrl"
+]]></properties>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+		<nrecno>4</nrecno>
+	</form>
+	<form>
+		<platform>COMMENT</platform>
+		<uniqueid>Screen</uniqueid>
+		<timestamp>0</timestamp>
+		<class/>
+		<classloc/>
+		<baseclass/>
+		<objname/>
+		<parent/>
+		<properties/>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1><![CDATA[VERSION =   3.00]]></reserved1>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8><![CDATA[acodey.h]]></reserved8>
+		<user/>
+		<nrecno>1</nrecno>
+	</form>
+	<form>
+		<platform>COMMENT</platform>
+		<uniqueid>RESERVED</uniqueid>
+		<timestamp>0</timestamp>
+		<class/>
+		<classloc/>
+		<baseclass/>
+		<objname/>
+		<parent/>
+		<properties/>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+		<nrecno>8</nrecno>
+	</form>
+</VFPData>
