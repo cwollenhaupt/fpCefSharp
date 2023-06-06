@@ -114,3 +114,4 @@ desktop.ini
 # here. They go into your local .git/info/exclude file which is
 # not pushed to any remote and remains local to your working copy.
 # =================================================================
+cef-bin-*
