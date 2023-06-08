@@ -216,4 +216,32 @@
 		<key>SHOWHTML</key>
 		<user/>
 	</project>
+	<project>
+		<name><![CDATA[showhtml_examples.scx]]></name>
+		<type>K</type>
+		<id>1455969841</id>
+		<outfile/>
+		<homedir/>
+		<exclude>false</exclude>
+		<mainprog>true</mainprog>
+		<savecode>false</savecode>
+		<debug>false</debug>
+		<encrypt>false</encrypt>
+		<nologo>false</nologo>
+		<cmntstyle>0</cmntstyle>
+		<objrev>0</objrev>
+		<devinfo/>
+		<object/>
+		<ckval>0</ckval>
+		<cpid>1252</cpid>
+		<ostype/>
+		<oscreator/>
+		<comments/>
+		<reserved1/>
+		<reserved2/>
+		<sccdata/>
+		<local>true</local>
+		<key>SHOWHTML_EXAMPLES</key>
+		<user/>
+	</project>
 </VFPData>

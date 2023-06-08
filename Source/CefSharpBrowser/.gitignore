@@ -114,4 +114,15 @@ desktop.ini
 # here. They go into your local .git/info/exclude file which is
 # not pushed to any remote and remains local to your working copy.
 # =================================================================
+
+# This folder is built from the fpCefSharp.DLL solution
 cef-bin-*
+
+# These files are created by CEF and CefSharp when running
+GPUCache/
+debug.log
+
+# These files are provided by Rick Strahl in wwDotNetBridge 
+ClrHost.dll
+wwDotnetBridge.dll
+wwDotNetBridge.prg
