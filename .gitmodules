@@ -1,0 +1,3 @@
+[submodule "Modules/wwDotnetBridge"]
+	path = Modules/wwDotnetBridge
+	url = git@github.com:RickStrahl/wwDotnetBridge.git
