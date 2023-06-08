@@ -78,4 +78,20 @@ rem Initial pass to generate FoxPro binaries
 rem =====================================================================================
 "%vfp9%" Source/CefSharpBrowser/tools/run_gencode.prg
 
+rem =====================================================================================
+rem Deploy wwDotNetBridge. We use a symbolic link here to always use the same file as 
+rem we downloaded in the submodule. This requires an NTFS formatted drive (as opposed
+rem to a FAT-family type of drive). For network shares you must have the "create symbolic
+rem links" permission on the server.
+rem =====================================================================================
+del Source\CefSharpBrowser\ClrHost.dll
+del Source\CefSharpBrowser\wwDotNetBridge.dll
+del Source\CefSharpBrowser\wwDotNetBridge.prg
+mklink Source\CefSharpBrowser\ClrHost.dll ^
+       ..\..\Modules\wwDotNetBridge\Distribution\ClrHost.dll
+mklink Source\CefSharpBrowser\wwDotNetBridge.dll ^
+       ..\..\Modules\wwDotNetBridge\Distribution\wwDotNetBridge.dll
+mklink Source\CefSharpBrowser\wwDotNetBridge.prg ^
+       ..\..\Modules\wwDotNetBridge\Distribution\wwDotNetBridge.prg
+
 :End
