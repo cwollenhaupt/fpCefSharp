@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <Platforms>x86</Platforms>
+    <OutputPath>$(SolutionDir)\..\CefSharpBrowser\cef-bin-v97.1.61</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- When updating the version name update the output path, as well! -->
+    <PackageReference Include="CefSharp.WinForms" Version="97.1.61" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+</Project>
