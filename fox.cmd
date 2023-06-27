@@ -17,8 +17,8 @@ rem These parameters require updates whenever there is a new release. This happe
 rem automatically in the release process.
 
 rem DO NOT MODIFY - version {
-set versionCefSharp=v97.1.61
-set versionFpCefSharp=%versionCefSharp%.1
+set versionCefSharp=v109.1.110
+set versionFpCefSharp=%versionCefSharp%
 rem } - DO NOT MODIFY
 
 rem These values are supposed to simplify the code
@@ -107,5 +107,10 @@ mklink Source\CefSharpBrowser\wwDotNetBridge.dll ^
        ..\..\Modules\wwDotNetBridge\Distribution\wwDotNetBridge.dll
 mklink Source\CefSharpBrowser\wwDotNetBridge.prg ^
        ..\..\Modules\wwDotNetBridge\Distribution\wwDotNetBridge.prg
+
+goto :End
+
+
+REM C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x86
 
 :End

@@ -86,7 +86,7 @@ Function GetCefSharpPath (toHost)
 	* These are all supported versions of the CefSharp browser and the supported VC++
 	* runtimes.
 	*--------------------------------------------------------------------------------------
-	Local laSupportedVersion[7]
+	Local laSupportedVersion[9]
 	laSupportedVersion[1] = "cef-bin-v65 vc2015/vc2019"
 	laSupportedVersion[2] = "cef-bin-v75.1.142 vc2015/vc2019"
 	laSupportedVersion[3] = "cef-bin-v79.1.360 vc2015/vc2019"
@@ -94,6 +94,8 @@ Function GetCefSharpPath (toHost)
 	laSupportedVersion[5] = "cef-bin-v91.1.230 vc2015/vc2019"
 	laSupportedVersion[6] = "cef-bin-v92.0.260 vc2015/vc2019"
 	laSupportedVersion[7] = "cef-bin-v97.1.61 vc2019"
+	laSupportedVersion[8] = "cef-bin-v109.1.110 vc2019"
+	laSupportedVersion[9] = "cef-bin-v114.2.100 vc2019"
 	
 	*--------------------------------------------------------------------------------------
 	* CefSharp is located in a sub folder. We are looking for the highest available 
@@ -380,6 +382,7 @@ Procedure GlobalInit (toBridge)
 	Else
 		loCefSettings = toBridge.CreateInstance("CefSharp.WinForms.CefSettings")
 		This.CheckDpiAwareness (m.toBridge, m.loCefSettings)
+		Doevents 
 	EndIf
 	This.RegisterSchemaHandlers (m.toBridge, m.loCefSettings)
 	This.SetLanguage (m.toBridge, m.loCefSettings)
@@ -456,6 +459,21 @@ Procedure CheckDpiAwareness (toBridge, toSettings)
 	If isProcessDPIAware () != 0
 		Return
 	EndIf
+	
+	*--------------------------------------------------------------------------------------
+	* Set the DPI Context for the entire process... Unaware is our only option here. The
+	* browser control does not display properly with GDI scaling. The content appears 
+	* outside of the browser control, but remains linked to the window.
+	* 
+	* The second problem we have is that GDI scaling does not appear to be working if it's
+	* only enabled via the manifest. However, the manifest is our only way to control DPI 
+	* awareness of the browser's subprocesses without actually compiling the entire 
+	* CefSharp project.
+	*--------------------------------------------------------------------------------------
+	#DEFINE DPI_AWARENESS_CONTEXT_UNAWARE 24592
+	#DEFINE DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED 1073766416
+	DECLARE long SetProcessDpiAwarenessContext IN Win32Api Long
+	SetProcessDpiAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE)
 	
 	*--------------------------------------------------------------------------------------
 	* If we don't have a DPI unware sub process, we can't do anything either. This could
