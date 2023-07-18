@@ -17,4 +17,8 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="call &quot;$(DevEnvDir)..\Tools\vsdevcmd.bat&quot;&#xD;&#xA;copy &quot;$(TargetDir)CefSharp.BrowserSubprocess.exe&quot; &quot;$(TargetDir)CefSharp.BrowserSubprocess.dpiunaware.exe&quot;&#xD;&#xA;mt -inputresource:&quot;$(TargetDir)CefSharp.BrowserSubprocess.exe&quot; -out:manifest.original.txt&#xD;&#xA;mt -manifest manifest.dpiunaware.txt -updateresource:&quot;$(TargetDir)CefSharp.BrowserSubprocess.dpiunaware.exe&quot;" />
+  </Target>
+
 </Project>
