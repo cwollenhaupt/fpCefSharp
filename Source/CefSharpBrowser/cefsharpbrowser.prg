@@ -51,18 +51,8 @@ Define Class CefSharpBrowser as Custom
 *========================================================================================
 * Returns the cefSharp folder with the highest supported and installed version of 
 * cefSharp. We always return a path, even when it doesn't exist.
-*
-* The first time we call GetCefSharpPath we must pass a host, so that we can execute
-* code in the AppDomain of the browser control. Calling BindToHost takes care of this.
 *========================================================================================
-Function GetCefSharpPath (toHost)
-
-	*--------------------------------------------------------------------------------------
-	* Assertions
-	*--------------------------------------------------------------------------------------
-	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
-		Assert Vartype (m.toHost) $ T_OBJECT + T_OPTIONAL
-	#ENDIF
+Function GetCefSharpPath
 
 	*--------------------------------------------------------------------------------------
 	* specify the program folder.
@@ -80,7 +70,7 @@ Function GetCefSharpPath (toHost)
 	* are installed: vc2015, vc2019.
 	*--------------------------------------------------------------------------------------
 	Local lcRuntime
-	lcRuntime = This.GetInstalledVcRuntime (m.toHost)
+	lcRuntime = This.GetInstalledVcRuntime ()
 	
 	*--------------------------------------------------------------------------------------
 	* These are all supported versions of the CefSharp browser and the supported VC++
@@ -130,14 +120,7 @@ Return m.lcPath
 * with previous releases of cefSharpBrowser we return vc2015 whenever we can't find any
 * later runtime without actually checking if the runtime is installed.
 *========================================================================================
-Procedure GetInstalledVcRuntime (toHost)
-
-	*--------------------------------------------------------------------------------------
-	* Assertions
-	*--------------------------------------------------------------------------------------
-	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
-		Assert Vartype (m.toHost) $ T_OBJECT + T_OPTIONAL
-	#ENDIF
+Procedure GetInstalledVcRuntime ()
 
 	*--------------------------------------------------------------------------------------
 	* VC2015, VC2017, VC2019 and VC2022 share the same runtime library. That is, the
@@ -150,7 +133,7 @@ Procedure GetInstalledVcRuntime (toHost)
 	* returns the default value if the key exists, but the value doesn't.
 	*--------------------------------------------------------------------------------------
 	Local lcVersion, loBridge
-	loBridge = This.DotNet (m.toHost)
+	loBridge = This.DotNetDefaultAppDomain ()
 	lcVersion = loBridge.InvokeStaticMethod ( ;
 		 "Microsoft.Win32.Registry", "GetValue" ;
 		,"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\DevDiv\VC\Servicing\14.0\RuntimeMinimum" ;
@@ -262,11 +245,20 @@ Procedure BindToHost (toHost, tcAddress, toConfig)
 	* Load assemblies. 
 	*--------------------------------------------------------------------------------------
 	Local lcPath, llOK
-	lcPath = Addbs (This.GetCefSharpPath (m.toHost))
+	lcPath = Addbs (This.GetCefSharpPath ())
 	loBridge.LoadAssembly (m.lcPath + "CefSharp.dll")
 	loBridge.LoadAssembly (m.lcPath + "CefSharp.Core.dll")
 	loBridge.LoadAssembly (m.lcPath + "CefSharp.WinForms.dll")	
 	loBridge.LoadAssembly (m.lcPath + "fpCefSharp.dll")
+	
+	*--------------------------------------------------------------------------------------
+	* v92 and later have an additional CefSharp.Core.Runtime.dll
+	*--------------------------------------------------------------------------------------
+	Local lnVersion
+	lnVersion = This.GetMajorVersion ()
+	If m.lnVersion >= 92
+		loBridge.LoadAssembly (m.lcPath + "CefSharp.Core.Runtime.dll")
+	EndIf
 	
 	*--------------------------------------------------------------------------------------
 	* Initialize Cef. Cef must be initialized exactly once per process. 
@@ -420,6 +412,17 @@ Function DotNet (toHost)
 	Local loBridge as wwdotnetbridge of wwdotnetbridge.prg
 	loBridge = NewObject("wwDotNetBridge", "wwDotNetBridge.fxp", "", "v4")
 	loBridge.oDotNetBridge = This.oDotNetBridge
+	
+Return m.loBridge
+
+*========================================================================================
+* Returns a wwDotNetbridge instance in the default app domain rather than the app domain
+* for the form.
+*========================================================================================
+Function DotNetDefaultAppDomain ()
+
+	Local loBridge as wwdotnetbridge of wwdotnetbridge.prg
+	loBridge = NewObject("wwDotNetBridge", "wwDotNetBridge.fxp", "", "v4")
 	
 Return m.loBridge
 
@@ -1049,6 +1052,28 @@ Function GetVersion ()
 	#ENDIF
 	
 Return m.lcVersion
+
+*========================================================================================
+* Returns the major version number 
+*========================================================================================
+Function GetMajorVersion
+
+	*--------------------------------------------------------------------------------------
+	* We parse the major version number from the version string
+	*--------------------------------------------------------------------------------------
+	Local lcVersion, lnVersion
+	lcVersion = This.GetVersion ()
+	lnVersion = Val (StrExtract(m.lcVersion, "cef-bin-v", "."))
+
+	*--------------------------------------------------------------------------------------
+	* Check return value
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.lnVersion) == T_NUMERIC
+		Assert not Empty (m.lnVersion)
+	#ENDIF
+
+Return m.lnVersion
 
 *========================================================================================
 * Release cef Browser resources
