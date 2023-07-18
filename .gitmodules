@@ -1,3 +1,6 @@
 [submodule "Modules/wwDotnetBridge"]
 	path = Modules/wwDotnetBridge
-	url = git@github.com:RickStrahl/wwDotnetBridge.git
+	url = https://github.com/RickStrahl/wwDotnetBridge.git
+[submodule "Modules/CefSharp"]
+	path = Modules/CefSharp
+	url = https://github.com/cefsharp/CefSharp.git
