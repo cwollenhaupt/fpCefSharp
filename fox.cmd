@@ -17,7 +17,7 @@ rem These parameters require updates whenever there is a new release. This happe
 rem automatically in the release process.
 
 rem DO NOT MODIFY - version {
-set versionCefSharp=v109.1.110
+set versionCefSharp=v97.1.61
 set versionFpCefSharp=%versionCefSharp%
 rem } - DO NOT MODIFY
 
