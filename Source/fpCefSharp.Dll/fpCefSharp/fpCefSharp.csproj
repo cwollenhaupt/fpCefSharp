@@ -3,13 +3,13 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <Platforms>x86</Platforms>
-    <OutputPath>$(SolutionDir)\..\CefSharpBrowser\cef-bin-v109.1.110</OutputPath>
+    <OutputPath>$(SolutionDir)\..\CefSharpBrowser\cef-bin-v97.1.61</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- When updating the version name update the output path, as well! -->
-    <PackageReference Include="CefSharp.WinForms" Version="109.1.110" />
+    <PackageReference Include="CefSharp.WinForms" Version="97.1.61" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="call &quot;$(DevEnvDir)..\Tools\vsdevcmd.bat&quot;&#xD;&#xA;copy &quot;$(TargetDir)CefSharp.BrowserSubprocess.exe&quot; &quot;$(TargetDir)CefSharp.BrowserSubprocess.dpiunaware.exe&quot;&#xD;&#xA;mt -inputresource:&quot;$(TargetDir)CefSharp.BrowserSubprocess.exe&quot; -out:manifest.original.txt&#xD;&#xA;mt -manifest manifest.dpiunaware.txt -updateresource:&quot;$(TargetDir)CefSharp.BrowserSubprocess.dpiunaware.exe&quot;" />
+    <Exec Command="call &quot;$(DevEnvDir)..\Tools\vsdevcmd.bat&quot;&#xD;&#xA;copy &quot;$(TargetDir)CefSharp.BrowserSubprocess.exe&quot; &quot;$(TargetDir)CefSharp.BrowserSubprocess.dpiunaware.exe&quot;&#xD;&#xA;mt -inputresource:&quot;$(TargetDir)CefSharp.BrowserSubprocess.exe&quot; -out:manifest.original.txt&#xD;&#xA;mt -manifest manifest.dpiunaware.txt -outputresource:&quot;$(TargetDir)CefSharp.BrowserSubprocess.dpiunaware.exe;1&quot;" />
   </Target>
 
 </Project>
