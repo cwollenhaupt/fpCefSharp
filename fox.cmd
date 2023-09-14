@@ -18,13 +18,14 @@ rem automatically in the release process.
 
 rem DO NOT MODIFY - version {
 set versionCefSharp=v97.1.61
-set versionFpCefSharp=%versionCefSharp%
+set versionFpCefSharp=%versionCefSharp%.2
 rem } - DO NOT MODIFY
 
 rem These values are supposed to simplify the code
 set urlGithub=https://github.com/cwollenhaupt/fpCefSharp
 set urlDownload=%urlGithub%/releases/download
 set urlRelease=%urlDownload%/%versionFpCefSharp%/fpCefSharp.%versionFpCefSharp%.zip
+set urlFpDotNet=https://github.com/cwollenhaupt/fpDotNet/releases/download/v1.0/fpDotNet.zip
 
 rem These values can be configured
 set vfp9=%programfiles(x86)%\Microsoft Visual FoxPro 9\vfp9.exe
@@ -33,7 +34,10 @@ if exist fox.user.cmd call fox.user.cmd
 
 
 if /I "%~1"=="init" goto Init
-goto :End
+if /I "%~1"=="release" goto Release
+
+echo Supported commands are init, release...
+goto :eof
 
 rem =====================================================================================
 rem INIT
@@ -108,9 +112,127 @@ mklink Source\CefSharpBrowser\wwDotNetBridge.dll ^
 mklink Source\CefSharpBrowser\wwDotNetBridge.prg ^
        ..\..\Modules\wwDotNetBridge\Distribution\wwDotNetBridge.prg
 
-goto :End
+goto :eof
 
+rem =====================================================================================
+rem RELEASE
+rem
+rem Creates a full and a core release for the last built of fpCefSharp. These releases
+rem are the ones that are uploaded as a release on GitHub.
+rem
+rem Release does not include a build process! You must build all required files before
+rem creating a release.
+rem =====================================================================================
+:Release
 
-REM C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x86
+rem =====================================================================================
+rem Prepare Release folder. The Release folder is a transient folder that gets completely
+rem wiped out for each build.
+rem =====================================================================================
+rmdir Release /q /s
 
-:End
+rem =====================================================================================
+rem Full release
+rem =====================================================================================
+set release=Release\fpCefSharp.%versionFpCefSharp%
+md %release%
+call :release-cefsharp %release%
+call :release-fpdotnet %release%
+call :release-wwdotnetbridge %release%
+call :release-fpcefsharp %release%
+call :release-demos %release%
+call :release-zip %release%
+
+rem =====================================================================================
+rem Core release
+rem =====================================================================================
+set release=Release\fpCefSharp.%versionFpCefSharp%.core
+md %release%
+call :release-cefsharp %release%
+call :release-fpdotnet %release%
+call :release-wwdotnetbridge %release%
+call :release-fpcefsharp %release%
+call :release-zip %release%
+
+echo Release completed in folder Release
+
+goto :eof
+
+rem =====================================================================================
+rem RELEASE - CefSharp
+rem
+rem Releases CefSharp into the specified release folder
+rem =====================================================================================
+:release-cefsharp
+echo Copying CefSharp
+xcopy Source\CefSharpBrowser\cef-bin-%versionCefSharp%\ ^
+	%~1\cef-bin-%versionCefSharp%\ /yce
+goto :eof
+
+rem =====================================================================================
+rem RELEASE - fpDotNet
+rem
+rem Releases fpDotNet into the specified release folder
+rem =====================================================================================
+:release-fpdotnet
+echo Downloading fpDotNet
+md temp
+curl --location ^
+     --ssl-no-revoke ^
+     --output temp/fpdotnet.zip ^
+     --url %urlFpDotNet%
+md %~1\fpDotNet
+tar -xf temp/fpdotnet.zip --directory %~1\fpDotNet
+rmdir temp /q /s
+goto :eof
+
+rem =====================================================================================
+rem RELEASE - wwDotNetBridge
+rem
+rem Releases wwDotNetBridge into the specified release folder
+rem =====================================================================================
+:release-wwdotnetbridge
+echo Copying wwDotNetBridge
+copy Source\CefSharpBrowser\ClrHost.dll %~1
+copy Source\CefSharpBrowser\wwDotNetBridge.dll %~1
+copy Source\CefSharpBrowser\wwDotNetBridge.prg %~1\
+goto :eof
+
+rem =====================================================================================
+rem RELEASE - fpCefSharp
+rem
+rem Releases fpCefSharp into the specified release folder
+rem =====================================================================================
+:release-fpcefsharp
+echo Copying fpCefSharp files
+copy Source\CefSharpBrowser\aco_lde.h %~1
+copy Source\CefSharpBrowser\aco_len.h %~1
+copy Source\CefSharpBrowser\acodey.h %~1\
+copy Source\CefSharpBrowser\cefsharpbrowser.prg %~1\
+copy Source\CefSharpBrowser\iacodey.h %~1\
+goto :eof
+
+rem =====================================================================================
+rem RELEASE - Demos
+rem
+rem Releases Demos into the specified release folder
+rem =====================================================================================
+:release-demos
+echo Coyping demo files
+copy Source\CefSharpBrowser\demo_*.prg %~1
+copy Source\CefSharpBrowser\showhtml*.scx %~1
+copy Source\CefSharpBrowser\showhtml*.sct %~1
+goto :eof
+
+rem =====================================================================================
+rem RELEASE - Zip
+rem
+rem Creates a ZIP file the specified release folder
+rem =====================================================================================
+:release-zip
+echo Building archive %~1.zip
+tar -C %~1 -acf %~1.zip *
+rmdir %~1 /q /s
+goto :eof
+
+release-zip
