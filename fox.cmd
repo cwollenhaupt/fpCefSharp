@@ -18,7 +18,7 @@ rem automatically in the release process.
 
 rem DO NOT MODIFY - version {
 set versionCefSharp=v97.1.61
-set versionFpCefSharp=%versionCefSharp%.2
+set versionFpCefSharp=%versionCefSharp%.3
 rem } - DO NOT MODIFY
 
 rem These values are supposed to simplify the code

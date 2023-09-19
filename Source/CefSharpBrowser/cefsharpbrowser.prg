@@ -242,23 +242,18 @@ Procedure BindToHost (toHost, tcAddress, toConfig)
 	loBridge = This.DotNet (m.toHost)
 	
 	*--------------------------------------------------------------------------------------
-	* Load assemblies. 
+	* Load assemblies. v92 and later have an additional CefSharp.Core.Runtime.dll
 	*--------------------------------------------------------------------------------------
-	Local lcPath, llOK
+	Local lcPath, llOK, lnVersion
 	lcPath = Addbs (This.GetCefSharpPath ())
-	loBridge.LoadAssembly (m.lcPath + "CefSharp.dll")
-	loBridge.LoadAssembly (m.lcPath + "CefSharp.Core.dll")
-	loBridge.LoadAssembly (m.lcPath + "CefSharp.WinForms.dll")	
-	loBridge.LoadAssembly (m.lcPath + "fpCefSharp.dll")
-	
-	*--------------------------------------------------------------------------------------
-	* v92 and later have an additional CefSharp.Core.Runtime.dll
-	*--------------------------------------------------------------------------------------
-	Local lnVersion
 	lnVersion = This.GetMajorVersion ()
+	loBridge.LoadAssembly (m.lcPath + "CefSharp.dll")
 	If m.lnVersion >= 92
 		loBridge.LoadAssembly (m.lcPath + "CefSharp.Core.Runtime.dll")
 	EndIf
+	loBridge.LoadAssembly (m.lcPath + "CefSharp.Core.dll")
+	loBridge.LoadAssembly (m.lcPath + "CefSharp.WinForms.dll")	
+	loBridge.LoadAssembly (m.lcPath + "fpCefSharp.dll")
 	
 	*--------------------------------------------------------------------------------------
 	* Initialize Cef. Cef must be initialized exactly once per process. 
