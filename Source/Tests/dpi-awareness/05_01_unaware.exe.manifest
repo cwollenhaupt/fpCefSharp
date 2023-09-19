@@ -20,7 +20,7 @@
 		<dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">unaware</dpiAwareness>
 	</asmv3:windowsSettings>
 </asmv3:application>
-</assembly><dependency>
+<dependency>
     <dependentAssembly>
         <assemblyIdentity
             type="win32"
