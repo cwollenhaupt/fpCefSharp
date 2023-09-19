@@ -331,7 +331,9 @@ setlocal
 set p2=%~2
 set exe=%p2:~0,-5%.exe
 if exist "%exe%" (
+   cd Source/Tests/dpi-awareness
    %exe%
+   cd ../../..
 ) else (
   echo Failed to build %exe%
 )
