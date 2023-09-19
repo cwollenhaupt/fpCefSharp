@@ -96,6 +96,7 @@ rem ============================================================================
 rem Initial pass to generate FoxPro binaries
 rem =====================================================================================
 "%vfp9%" Source/CefSharpBrowser/tools/run_gencode.prg
+"%vfp9%" Source/Tests/dpi-awareness/tools/run_gencode.prg
 
 rem =====================================================================================
 rem Deploy wwDotNetBridge into multiple locations
