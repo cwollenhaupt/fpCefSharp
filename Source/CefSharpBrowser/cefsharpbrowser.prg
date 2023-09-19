@@ -298,7 +298,7 @@ Procedure BindToHost (toHost, tcAddress, toConfig)
 	ltStart = Datetime ()
 	Do while not loBridge.GetProperty (m.loChromium, "IsBrowserInitialized")
 		If Datetime() > ltStart+5
-			EventLog ("cefsharp.bind-to-host.browser-timeout")
+			This.EventLog ("cefsharp.bind-to-host.browser-timeout")
 			Exit
 		EndIf
 		Sleep (50)
@@ -1294,6 +1294,22 @@ Procedure UnWrapType (toBridge, toObject)
 	EndIf
 
 Return m.loUnwrapped
+
+*========================================================================================
+* EventLog is called when there is a problem somewhere within this class. You can 
+* overide this method or use BindEvents to log this information with the mechansim
+* you use in your application.
+*========================================================================================
+Procedure EventLog (tcCode, tcExtraInfo)
+	
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.tcCode) == T_CHARACTER
+		Assert not Empty (m.tcCode)
+		Assert Vartype (m.tcExtraInfo) == T_CHARACTER
+	#ENDIF
 
 *========================================================================================
 * The following methods are modified versions of the ones found in Rick Strahl's 
