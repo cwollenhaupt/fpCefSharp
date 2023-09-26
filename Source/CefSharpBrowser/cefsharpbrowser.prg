@@ -1293,7 +1293,11 @@ Return m.loUnwrapped
 *========================================================================================
 * EventLog is called when there is a problem somewhere within this class. You can 
 * overide this method or use BindEvents to log this information with the mechansim
-* you use in your application.
+* you use in your application. 
+*
+* tcCode is a code that uniquely identifies the source code line that called this method.
+*
+* tcExtraInfo is optional. Some events might provide extra info to aid in debugging.
 *========================================================================================
 Procedure EventLog (tcCode, tcExtraInfo)
 	
@@ -1303,7 +1307,7 @@ Procedure EventLog (tcCode, tcExtraInfo)
 	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
 		Assert Vartype (m.tcCode) == T_CHARACTER
 		Assert not Empty (m.tcCode)
-		Assert Vartype (m.tcExtraInfo) == T_CHARACTER
+		Assert Vartype (m.tcExtraInfo) $ T_CHARACTER+T_OPTIONAL
 	#ENDIF
 
 *========================================================================================
