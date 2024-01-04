@@ -459,6 +459,27 @@ Procedure CheckDpiAwareness (toBridge, toSettings)
 	EndIf
 	
 	*--------------------------------------------------------------------------------------
+	* SetProcessDpiAwarenessContext is only available on Windows 10 Build 1703 and later
+	* (see 1). Microsoft recommends not to check for the operating system version, but
+	* for the existence of the API function itself (see 2).
+	*
+	* 1) https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setprocessdpiawarenesscontext
+	* 2) https://learn.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version
+	*--------------------------------------------------------------------------------------
+	Local lnModule, lnProc
+	Declare Long LoadLibrary in Win32Api String
+	Declare FreeLibrary in Win32Api Long
+	Declare Long GetProcAddress in Win32Api Long, String
+	lnModule = LoadLibrary("User32")
+	If m.lnModule != 0
+		lnProc = GetProcAddress (m.lnModule, "SetProcessDpiAwarenessContext")
+		FreeLibrary (m.lnModule)
+	EndIf
+	If Empty (m.lnProc)
+		Return
+	EndIf
+	
+	*--------------------------------------------------------------------------------------
 	* Set the DPI Context for the entire process... Unaware is our only option here. The
 	* browser control does not display properly with GDI scaling. The content appears 
 	* outside of the browser control, but remains linked to the window.
