@@ -3,13 +3,22 @@
 *
 * This object binds to a DotNetContainer Host to load an instance of the cefSharp
 * Browser control.
+*
+* In your application it makes sense to inherit from this class and change application
+* wide settings such as the host name, languages and your handling for logging. Then use
+* your own subclass for all occurrences of a browser in your application.
 *========================================================================================
 Define Class CefSharpBrowser as Custom
 
 	#include Acodey.h
 
 	*--------------------------------------------------------------------------------------
-	* Hostname for call back Urls. 
+	* Hostname for call back Urls. If you use multiple host names you can separate them
+	* with a comma. You can only register host names one time per process. This happens
+	* the first time that you call BindToHost().
+	*
+	* If your application uses third party libraries that require their own host name,
+	* you have to register those along with yours.
 	*--------------------------------------------------------------------------------------
 	cHostName = "MyApp"
 	
@@ -541,14 +550,18 @@ Procedure RegisterSchemaHandlers (toBridge, toSettings)
 	*--------------------------------------------------------------------------------------
 	* We handle any request for http://myApp/ and https://myApp/
 	*--------------------------------------------------------------------------------------
-	This.RegisterSchemeHandler ("http", m.toBridge, m.toSettings, m.loFactory)
-	This.RegisterSchemeHandler ("https", m.toBridge, m.toSettings, m.loFactory)
+	Local laHostName[1], lnHost, lcHost
+	For lnHost = 1 to ALines(laHostName, This.cHostName, 1+4, ",")
+		lcHost = laHostName[m.lnHost]
+		This.RegisterSchemeHandler ("http", m.toBridge, m.toSettings, m.loFactory, m.lcHost)
+		This.RegisterSchemeHandler ("https", m.toBridge, m.toSettings, m.loFactory, m.lcHost)
+	EndFor
 
 *========================================================================================
 * Register our schema handler that triggers the callback handler for a particular
 * browser window.
 *========================================================================================
-Procedure RegisterSchemeHandler (tcProtocol, toBridge, toSettings, toFactory)
+Procedure RegisterSchemeHandler (tcProtocol, toBridge, toSettings, toFactory, tcHost)
 
 	*--------------------------------------------------------------------------------------
 	* Assertions
@@ -558,6 +571,7 @@ Procedure RegisterSchemeHandler (tcProtocol, toBridge, toSettings, toFactory)
 		Assert Vartype(m.toBridge) == T_OBJECT
 		Assert Vartype(m.toSettings) == T_OBJECT
 		Assert Vartype(m.toFactory) == T_OBJECT
+		Assert Vartype(m.tcHost) == T_CHARACTER
 	#ENDIF
 	
 	*--------------------------------------------------------------------------------------
@@ -566,7 +580,7 @@ Procedure RegisterSchemeHandler (tcProtocol, toBridge, toSettings, toFactory)
 	Local loScheme
 	loScheme = toBridge.CreateInstance ("CefSharp.CefCustomScheme")
 	loScheme.SchemeName = m.tcProtocol
-	loScheme.DomainName = This.cHostName
+	loScheme.DomainName = m.tcHost
 	toBridge.SetProperty (m.loScheme, "SchemeHandlerFactory", m.toFactory)
 	
 	*--------------------------------------------------------------------------------------
@@ -1299,9 +1313,13 @@ Procedure UnWrapType (toBridge, toObject)
 	
 	*--------------------------------------------------------------------------------------
 	* Check if .NET Bridge wrapped the native object with a ComArray.
+	*
+	* CAVE: A direct call to GetType() crashes VFP instantly on some machines. It's not 
+	*       clear what causes this behavior. However, indirectly calling via InvokeMethod
+	*       does not cause a crash.
 	*--------------------------------------------------------------------------------------
 	Local loType, lcName, loUnwrapped
-	loType = m.toObject.GetType ()
+	loType = toBridge.InvokeMethod (m.toObject, "GetType")
 	lcName = toBridge.GetProperty (m.loType, "FullName")
 	If m.lcName == "Westwind.WebConnection.ComArray"
 		loUnwrapped = m.toObject.Instance
