@@ -44,6 +44,45 @@ Define Class CefSharpBrowser as Custom
 	lCheckRuntime = .T.
 	
 	*--------------------------------------------------------------------------------------
+	* A list of all supported versions of CefSharp. These are the ones that fpCefSharp has
+	* been tested with. You can remove older versions for security reasons or if older
+	* versions do not support the feature set that your application requires. You can 
+	* change the value of this property until you call BindToHost.
+	*--------------------------------------------------------------------------------------
+	cSupportedVersions = "" ;
+		+" cef-bin-v65 vc2015/vc2019" ;
+		+",cef-bin-v75.1.142 vc2015/vc2019" ;
+		+",cef-bin-v79.1.360 vc2015/vc2019" ;
+		+",cef-bin-v84.4.10 vc2015/vc2019" ;
+		+",cef-bin-v91.1.230 vc2015/vc2019" ;
+		+",cef-bin-v92.0.260 vc2015/vc2019" ;
+		+",cef-bin-v97.1.61 vc2019" ;
+		+",cef-bin-v109.1.110 vc2019" ;
+		+",cef-bin-v114.2.100 vc2019" ;
+	
+	*--------------------------------------------------------------------------------------
+	* Set to .T. to automatically load newer versions than the latest one supported. 
+	* fpCefSharp only supports known and tested versions of CefSharp by default, because
+	* Google does not guarantee backward compatibility for new releases. 
+	
+	* Some versions introduce additionally required steps or require a new version of the 
+	* VC++ runtime. Such a release would not work properly until fpCefSharp is updated to
+	* handle the new steps or your application contains the code required to make them
+	* work.
+	*
+	* While limiting fpCefSharp to known versions eliminates the risk of sudden behavior
+	* in change and random errors, this approach requires an update in order to use a new
+	* release of CefSharp. CefSharp is updated every other week and sometimes has security
+	* hotfixes that might require a quicker response.
+	*
+	* If your application is released on a different schedule, you can set the
+	* lAlwaysUseLatestRelease property to .T. and ship CefSharp independently from your
+	* main application. However, you should study the CefSharp and fpCefSharp release
+	* notes for breaking changes.
+	*--------------------------------------------------------------------------------------
+	lAlwaysUseLatestRelease = .F.
+	
+	*--------------------------------------------------------------------------------------
 	* Internal properties. Ensures that BindToHost is never called more than once per
 	* instance. We avoid repeated calls by maintaining a .NET Bridge instance that is 
 	* bound to the AppDomain of the InterOp layer.
@@ -57,11 +96,23 @@ Define Class CefSharpBrowser as Custom
 	*--------------------------------------------------------------------------------------
 	oSubscriptions = null
 	
+	*--------------------------------------------------------------------------------------
+	* Internal property. Contains the path to the CefSharp version that we are loading.
+	*--------------------------------------------------------------------------------------
+	cCefSharpPath = ""
+	
 *========================================================================================
 * Returns the cefSharp folder with the highest supported and installed version of 
 * cefSharp. We always return a path, even when it doesn't exist.
 *========================================================================================
 Function GetCefSharpPath
+
+	*--------------------------------------------------------------------------------------
+	* We return the cached one if we determined it once
+	*--------------------------------------------------------------------------------------
+	If not Empty (this.cCefSharpPath)
+		Return this.cCefSharpPath
+	EndIf 
 
 	*--------------------------------------------------------------------------------------
 	* specify the program folder.
@@ -76,25 +127,11 @@ Function GetCefSharpPath
 
 	*--------------------------------------------------------------------------------------
 	* CefSharp v93 requires at least the VC++ 2019 runtime. We determine what runtimes 
-	* are installed: vc2015, vc2019.
+	* are installed: vc2015, vc2019. We also match each version with one or more runtimes.
 	*--------------------------------------------------------------------------------------
-	Local lcRuntime
+	Local lcRuntime, laSupportedVersion[1]
 	lcRuntime = This.GetInstalledVcRuntime ()
-	
-	*--------------------------------------------------------------------------------------
-	* These are all supported versions of the CefSharp browser and the supported VC++
-	* runtimes.
-	*--------------------------------------------------------------------------------------
-	Local laSupportedVersion[9]
-	laSupportedVersion[1] = "cef-bin-v65 vc2015/vc2019"
-	laSupportedVersion[2] = "cef-bin-v75.1.142 vc2015/vc2019"
-	laSupportedVersion[3] = "cef-bin-v79.1.360 vc2015/vc2019"
-	laSupportedVersion[4] = "cef-bin-v84.4.10 vc2015/vc2019"
-	laSupportedVersion[5] = "cef-bin-v91.1.230 vc2015/vc2019"
-	laSupportedVersion[6] = "cef-bin-v92.0.260 vc2015/vc2019"
-	laSupportedVersion[7] = "cef-bin-v97.1.61 vc2019"
-	laSupportedVersion[8] = "cef-bin-v109.1.110 vc2019"
-	laSupportedVersion[9] = "cef-bin-v114.2.100 vc2019"
+	This.GetSupportedVersions (@laSupportedVersion, m.lcRoot)
 	
 	*--------------------------------------------------------------------------------------
 	* CefSharp is located in a sub folder. We are looking for the highest available 
@@ -113,6 +150,11 @@ Function GetCefSharpPath
 			EndIf
 		EndIf
 	EndFor
+	
+	*--------------------------------------------------------------------------------------
+	* We cache the return value so that we are not constantly iterating the folder
+	*--------------------------------------------------------------------------------------
+	This.cCefSharpPath = m.lcPath
 	
 	*--------------------------------------------------------------------------------------
 	* Check return value
@@ -174,6 +216,117 @@ Procedure GetInstalledVcRuntime ()
 	EndCase
 
 Return m.lcVersion
+
+*========================================================================================
+* Fill the array with all supported versions
+*========================================================================================
+Procedure GetSupportedVersions (raVersions, tcRoot)
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.tcRoot) == T_CHARACTER
+		Assert not Empty (m.tcRoot)
+		Assert Right(m.tcRoot, 1) == "\"
+	#ENDIF
+
+	*--------------------------------------------------------------------------------------
+	* Loading all known versions. These can be customized if needed by setting the 
+	* cSupportedVersions property before calling BindToHost().
+	*--------------------------------------------------------------------------------------
+	Local lnCount
+	lnCount = ALines (raVersions, This.cSupportedVersions, 1+4, ",")
+	
+	*--------------------------------------------------------------------------------------
+	* Further checks are only required for unsupported versions
+	*--------------------------------------------------------------------------------------
+	If not This.lAlwaysUseLatestRelease
+		#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+			Assert m.lnCount > 0 ASSMSG "You must support at least one version"
+		#ENDIF
+		Return
+	EndIf
+	
+	*--------------------------------------------------------------------------------------
+	* What is the highest supported version number? 
+	*--------------------------------------------------------------------------------------
+	Local lcSupported, lnVersion, lcVersion, lcRuntime, lcSortable
+	lcSupported = This.GetSortableVersion ("cef-bin-v0.0.0")
+	lcRuntime = "vc2019"
+	For m.lnVersion = 1 to m.lnCount
+		lcVersion = GetWordNum (raVersions[m.lnVersion], 1)
+		lcSortable = This.GetSortableVersion (m.lcVersion)
+		If m.lcSortable > m.lcSupported
+			lcSupported = This.GetSortableVersion (m.lcVersion)
+			lcRuntime = GetWordNum (raVersions[m.lnVersion], 2)
+		EndIf 
+	EndFor
+	
+	*--------------------------------------------------------------------------------------
+	* We don't know which version number might be higher. We only look for the highest
+	* one, not all unsupported ones. Also, the number must be higher than one we already
+	* support. We do not look for unknown versions between two known versions.
+	*--------------------------------------------------------------------------------------
+	Local lnDir, laDir[1], lcSortable, lcFolder
+	lcFolder = ""
+	For lnDir = 1 to ADir (laDir, m.tcRoot+"cef-bin-v*", "D")
+		lcSortable = This.GetSortableVersion (laDir[m.lnDir,1])
+		If m.lcSortable > m.lcSupported
+			lcSupported = m.lcSortable
+			lcFolder = laDir[m.lnDir,1]
+		EndIf
+	EndFor 
+	
+	*--------------------------------------------------------------------------------------
+	* If we found a newer version we add it to the list of supported versions. The code
+	* will later check again for the highest version and find this one. We assume that
+	* the latest version supports the same VC++ runtime as the latest known version.
+	*--------------------------------------------------------------------------------------
+	If Empty (m.lcFolder)
+		#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+			Assert m.lnCount > 0 ASSMSG "You must support at least one version"
+		#ENDIF
+	Else
+		lnCount = m.lnCount + 1
+		Dimension raVersions[m.lnCount]
+		raVersions[m.lnCount] = m.lcFolder + " " + m.lcRuntime
+	EndIf
+	
+*========================================================================================
+* Turns a CefSharp folder name into a sortable version number. "cef-bin-v109.1.110"
+* becomes "00109.00001.00110".
+*========================================================================================
+Procedure GetSortableVersion (tcVersion)
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.tcVersion) == T_CHARACTER
+		Assert not Empty (m.tcVersion)
+	#ENDIF
+	
+	*--------------------------------------------------------------------------------------
+	* Extract version numbers
+	*--------------------------------------------------------------------------------------
+	Local lcVersion, lcPart1, lcPart2, lcPart3
+	lcVersion = StrExtract (Lower (m.tcVersion), "cef-bin-v", "")
+	lcPart1 = GetWordNum (m.lcVersion, 1, ".")
+	lcPart2 = GetWordNum (m.lcVersion, 2, ".")
+	lcPart3 = GetWordNum (m.lcVersion, 3, ".")
+	
+	*--------------------------------------------------------------------------------------
+	* Concat reformatted version numbers. Should the second or third part be missing, we 
+	* automatically use "00000" instead.
+	*--------------------------------------------------------------------------------------
+	Local lcSortable
+	lcSortable = ;
+		Padl (m.lcPart1, 5, "0") + "." + ;
+		Padl (m.lcPart2, 5, "0") + "." + ;
+		Padl (m.lcPart3, 5, "0")
+		
+Return m.lcSortable	
 
 *========================================================================================
 * Returns .T. if the cefSharp browser is available. This is the case when the application
