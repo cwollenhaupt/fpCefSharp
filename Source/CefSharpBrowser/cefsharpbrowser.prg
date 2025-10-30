@@ -50,15 +50,16 @@ Define Class CefSharpBrowser as Custom
 	* change the value of this property until you call BindToHost.
 	*--------------------------------------------------------------------------------------
 	cSupportedVersions = "" ;
-		+" cef-bin-v65 vc2015/vc2019" ;
-		+",cef-bin-v75.1.142 vc2015/vc2019" ;
-		+",cef-bin-v79.1.360 vc2015/vc2019" ;
-		+",cef-bin-v84.4.10 vc2015/vc2019" ;
-		+",cef-bin-v91.1.230 vc2015/vc2019" ;
-		+",cef-bin-v92.0.260 vc2015/vc2019" ;
-		+",cef-bin-v97.1.61 vc2019" ;
-		+",cef-bin-v109.1.110 vc2019" ;
-		+",cef-bin-v114.2.100 vc2019" ;
+		+" cef-bin-v65 vc2015/vc2019/vc2022" ;
+		+",cef-bin-v75.1.142 vc2015/vc2019/vc2022" ;
+		+",cef-bin-v79.1.360 vc2015/vc2019/vc2022" ;
+		+",cef-bin-v84.4.10 vc2015/vc2019/vc2022" ;
+		+",cef-bin-v91.1.230 vc2015/vc2019/vc2022" ;
+		+",cef-bin-v92.0.260 vc2015/vc2019/vc2022" ;
+		+",cef-bin-v97.1.61 vc2019/vc2022" ;
+		+",cef-bin-v109.1.110 vc2019/vc2022" ;
+		+",cef-bin-v114.2.100 vc2019/vc2022" ;
+		+",cef-bin-v140.1.140 vc2022"
 	
 	*--------------------------------------------------------------------------------------
 	* Set to .T. to automatically load newer versions than the latest one supported. 
@@ -81,6 +82,22 @@ Define Class CefSharpBrowser as Custom
 	* notes for breaking changes.
 	*--------------------------------------------------------------------------------------
 	lAlwaysUseLatestRelease = .F.
+	
+	*--------------------------------------------------------------------------------------
+	* CEF doesn't run as an administrator by default. This is a security measure to prevent
+	* malicious websites to execute in an elevated environment. While this conforms with
+	* best practices it doesn't work well with Visual FoxPro. If your project contains
+	* a COM server you must run VFP as an administrator in order to build an EXE. There-
+	* fore VFP developers are more likely to test their application as an administrator.
+	*
+	* If you don't need elevation set this property to .F. before calling BindToHost().
+	* If you set this property to .F. and launch your application as an administrator,
+	* you cannot display a browser window. Instead your application is launched a second
+	* time with mixed up command line arguments. To avoid this you should check for
+	* elevation and terminate your application if anyone attempted to run it as an
+	* administrator.
+	*--------------------------------------------------------------------------------------
+	lAllowRunAsAdministrator = .T.
 	
 	*--------------------------------------------------------------------------------------
 	* Internal properties. Ensures that BindToHost is never called more than once per
@@ -126,8 +143,9 @@ Function GetCefSharpPath
 	lcRoot = Addbs (m.lcRoot)
 
 	*--------------------------------------------------------------------------------------
-	* CefSharp v93 requires at least the VC++ 2019 runtime. We determine what runtimes 
-	* are installed: vc2015, vc2019. We also match each version with one or more runtimes.
+	* CefSharp v93 requires at least the VC++ 2019 runtime, v138 at least the VC++ 2022
+	* runtime. We determine what runtimes are installed: vc2015, vc2019, vc2022. We also 
+	* match each version with one or more runtimes.
 	*--------------------------------------------------------------------------------------
 	Local lcRuntime, laSupportedVersion[1]
 	lcRuntime = This.GetInstalledVcRuntime ()
@@ -167,9 +185,9 @@ Function GetCefSharpPath
 Return m.lcPath
 
 *========================================================================================
-* Returns the installed VC++ runtime (vc2015, vc2019). To remain backward compatible
-* with previous releases of cefSharpBrowser we return vc2015 whenever we can't find any
-* later runtime without actually checking if the runtime is installed.
+* Returns the installed VC++ runtime (vc2015, vc2019, vc2022). To remain backward 
+* compatible with previous releases of cefSharpBrowser we return vc2015 whenever we 
+* can't find any later runtime without actually checking if the runtime is installed.
 *========================================================================================
 Procedure GetInstalledVcRuntime ()
 
@@ -201,14 +219,16 @@ Procedure GetInstalledVcRuntime ()
 	lcMinor = GetWordNum (m.lcVersion, 2, ".")
 	
 	*--------------------------------------------------------------------------------------
-	* Currently we only distinguish between vc2015 and vc2019. For newer runtimes such as
-	* VC 2022 we still return vc2019 until a future version of CefSharp actually requires
+	* Currently we only distinguish between vc2015 and vc2022. For newer runtimes such as
+	* VC 2026 we still return vc2022 until a future version of CefSharp actually requires
 	* this as a minimum version.
 	*--------------------------------------------------------------------------------------
 	Local lcVersion
 	Do case
 	Case Val (m.lcMajor) > 14
-		lcVersion = "vc2019"
+		lcVersion = "vc2022"
+	Case Val (m.lcMajor) = 14 and Val (m.lcMinor) >= 30
+		lcVersion = "vc2022"  && 14.30 is VC 2022 with multiple release up to 14.41.
 	Case Val (m.lcMajor) = 14 and Val (m.lcMinor) >= 20
 		lcVersion = "vc2019"  && 14.20 is VC 2019 with multiple release up to 14.29.
 	Otherwise 
@@ -253,7 +273,7 @@ Procedure GetSupportedVersions (raVersions, tcRoot)
 	*--------------------------------------------------------------------------------------
 	Local lcSupported, lnVersion, lcVersion, lcRuntime, lcSortable
 	lcSupported = This.GetSortableVersion ("cef-bin-v0.0.0")
-	lcRuntime = "vc2019"
+	lcRuntime = "vc2022"
 	For m.lnVersion = 1 to m.lnCount
 		lcVersion = GetWordNum (raVersions[m.lnVersion], 1)
 		lcSortable = This.GetSortableVersion (m.lcVersion)
@@ -420,7 +440,12 @@ Procedure BindToHost (toHost, tcAddress, toConfig)
 	*--------------------------------------------------------------------------------------
 	* Initialize Cef. Cef must be initialized exactly once per process. 
 	*--------------------------------------------------------------------------------------
-	This.GlobalInit (m.loBridge)
+	Local llOk
+	llOk = This.GlobalInit (m.loBridge)
+	If not m.llOk
+		This.EventLog ("cefsharp.bind-to-host.initialize-failed")
+		Return .F.
+	EndIf 
 	
 	*--------------------------------------------------------------------------------------
 	* When we have a config object, we can not navigate to the requested Url directly.
@@ -507,18 +532,20 @@ Procedure GlobalInit (toBridge)
 	#ENDIF
 	
 	*--------------------------------------------------------------------------------------
-	* Every call but the first one returns here
+	* Every call but the first one returns here. CefSharp v127 added NULL as a return value
+	* with NULL meaning, that the browser is not initilized and false that initialization
+	* failed previously.
 	*--------------------------------------------------------------------------------------
-	If toBridge.GetStaticproperty("CefSharp.Cef", "IsInitialized")
-		Return
+	If Nvl (toBridge.GetStaticproperty("CefSharp.Cef", "IsInitialized"), .F.)
+		Return .T.
 	EndIf
-
+	
 	*--------------------------------------------------------------------------------------
 	* Different versions of cefSharp have slightly different interfaces.
 	*--------------------------------------------------------------------------------------
 	Local lcVersion
 	lcVersion = This.GetVersion ()
-	
+		
 	*--------------------------------------------------------------------------------------
 	* Initialize Cef. 
 	*--------------------------------------------------------------------------------------
@@ -535,12 +562,30 @@ Procedure GlobalInit (toBridge)
 	EndIf
 	This.RegisterSchemaHandlers (m.toBridge, m.loCefSettings)
 	This.SetLanguage (m.toBridge, m.loCefSettings)
+
+	*--------------------------------------------------------------------------------------
+	* Prepare command line arguments
+	*
+	* v138 changes the behavior of elevated applications. If we allow running the 
+	* application as an administrator we ask CEF not to relaunch our application without
+	* admin privileges.
+	*--------------------------------------------------------------------------------------
 	loCefCommandLineArgs = toBridge.GetProperty(loCefSettings, "CefCommandLineArgs")
 	loCefCommandLineArgs = This.UnWrapType (m.toBridge, m.loCefCommandLineArgs)
 	toBridge.InvokeMethod (m.loCefCommandLineArgs, "Add", "enable-media-stream", "1")
 	toBridge.InvokeMethod (m.loCefCommandLineArgs, "Add", ;
 		"--use-fake-ui-for-media-stream", "1")
-	toBridge.InvokeStaticMethod("CefSharp.Cef", "Initialize", m.loCefSettings)	
+	If This.lAllowRunAsAdministrator
+		toBridge.InvokeMethod (m.loCefCommandLineArgs, "Add", "--do-not-de-elevate", "1")
+	EndIf
+	
+	*--------------------------------------------------------------------------------------
+	* This will launch various support processes.
+	*--------------------------------------------------------------------------------------
+	Local llOk
+	llOk = toBridge.InvokeStaticMethod("CefSharp.Cef", "Initialize", m.loCefSettings)
+
+Return m.llOk
 	
 *========================================================================================
 * wwDotNetBrifge. We have to use the instance that the DotNet Container provided to

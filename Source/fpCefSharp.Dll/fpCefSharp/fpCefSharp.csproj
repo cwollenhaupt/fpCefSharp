@@ -3,13 +3,13 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <Platforms>x86</Platforms>
-    <OutputPath>$(SolutionDir)\..\CefSharpBrowser\cef-bin-v97.1.61</OutputPath>
+    <OutputPath>$(SolutionDir)\..\CefSharpBrowser\cef-bin-v140.1.140</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- When updating the version name update the output path, as well! -->
-    <PackageReference Include="CefSharp.WinForms" Version="97.1.61" />
+    <PackageReference Include="CefSharp.WinForms" Version="140.1.140" />
   </ItemGroup>
 
   <ItemGroup>
