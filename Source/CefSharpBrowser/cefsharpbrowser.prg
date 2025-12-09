@@ -1172,7 +1172,13 @@ Procedure OnProcessRequestProperty (tcFileName, toResourceHandler, toRequest)
 	*--------------------------------------------------------------------------------------
 	Local lcProperty, lcContent
 	lcProperty = Chrtran (m.tcFileName, ".", "_")
-	lcContent = This.oConfig.&lcProperty
+	If PemStatus (This.oConfig, m.lcProperty, PEM_EXIST)
+		lcContent = This.oConfig.&lcProperty
+	Else
+		Return This.ErrorResponse (m.toResourceHandler ;
+			,"System.Net.HttpStatusCode.NotFound" ;
+		)
+	EndIf
 	
 	*--------------------------------------------------------------------------------------
 	* Depending on the file extension we choose a different MIME type. Presently we support
@@ -1233,7 +1239,37 @@ Procedure OnProcessRequestProperty (tcFileName, toResourceHandler, toRequest)
 	)
 	loBridge.SetProperty (toResourceHandler, "Stream", m.loStream)
 	loBridge.SetProperty (toResourceHandler, "AutoDisposeStream", .T.)
-		
+
+*========================================================================================
+* Returns an error code to the browser
+*========================================================================================
+Procedure ErrorResponse (toResourceHandler, tcStatusCode)
+
+	*--------------------------------------------------------------------------------------
+	* Assertions 
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.toResourceHandler) == T_OBJECT
+		Assert Vartype (m.tcStatusCode) == T_CHARACTER
+		Assert not Empty (m.tcStatusCode)
+	#ENDIF
+
+	*--------------------------------------------------------------------------------------
+	* We need the bridge for the browser control
+	*--------------------------------------------------------------------------------------
+	Local loBridge
+	loBridge = This.DotNet ()
+
+	*--------------------------------------------------------------------------------------
+	* We send only the error code for now
+	*--------------------------------------------------------------------------------------
+	Local loLength
+	loLength = loBridge.ConvertToDotNetValue (0, "Int64")
+	loBridge.SetProperty (toResourceHandler, "ResponseLength", m.loLength)
+	loBridge.SetProperty (toResourceHandler, "StatusCode" ;
+		,loBridge.GetEnumValue (m.tcStatusCode) ;
+	)
+
 *=========================================================================================
 * Reload the current page.
 *=========================================================================================
