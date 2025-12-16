@@ -59,7 +59,8 @@ Define Class CefSharpBrowser as Custom
 		+",cef-bin-v97.1.61 vc2019/vc2022" ;
 		+",cef-bin-v109.1.110 vc2019/vc2022" ;
 		+",cef-bin-v114.2.100 vc2019/vc2022" ;
-		+",cef-bin-v140.1.140 vc2022"
+		+",cef-bin-v140.1.140 vc2022" ;
+		+",cef-bin-v143.0.90 vc2022"
 	
 	*--------------------------------------------------------------------------------------
 	* Set to .T. to automatically load newer versions than the latest one supported. 
@@ -98,6 +99,56 @@ Define Class CefSharpBrowser as Custom
 	* administrator.
 	*--------------------------------------------------------------------------------------
 	lAllowRunAsAdministrator = .T.
+	
+	*--------------------------------------------------------------------------------------
+	* Only one process is allowed to access the local cache folder. Up to version v136 
+	* this wasn't enforced. While applications might have worked most of the time, 
+	* conflicts would sometimes cause corruption or erratic behavior. Since Version v137
+	* CEF enforces this rule strictly and will not allow more than one process per
+	* cache directory.
+	*
+	* By default the user data folder (called root cache folder) within CEF is shared 
+	* among all applications that use CEF as their internal browser. The folder on Windows
+	* Systems is located in "%LocalAppData%\CEF\User Data".
+	*
+	* You can specify here a dedicated cache path for your application. With multiple
+	* instances of your application each instance still needs there own dedicated folder.
+	*
+	* fpCefSharp might change cRootCachePath (see cRootCacheBehavior property). In this
+	* case lIsDefaultPath is set to .F. allowing you to detect the non-default value.
+	*--------------------------------------------------------------------------------------
+	cRootCachePath = ""
+	lIsDefaultPath = .T.
+	
+	*--------------------------------------------------------------------------------------
+	* This setting defines the behavior of the second and further applications that use
+	* the same root cache path.
+	*
+	*  "unique" (default)    When fpCefSharp detects that another instance is already
+	*                        using the cache folder, it creates a temporary cache folder
+	*                        and configures this one instead. Any cookies or cached items
+	*                        won't be available. The first launch might take a little 
+	*                        longer as CEF builds up the cache structure.
+	*                        
+	*                        There is a small chance of a race condition if two instances
+	*                        are launched almost together. If the second instance can't 
+	*                        detect that the first instance is ahead and about to lock the
+	*                        root cache folder, then the second instance will return .F.
+	*                        in BindToHost() and CEF is not available in this instance.
+	*                        Only restarting the EXE will make CEF available.
+	*                        
+	*                        The temporary folder is created in the %TEMP% folder. Because
+	*                        the folder is locked until CEF completely unloaded, it is not
+	*                        possible to automate this. The cache folder that is actually
+	*                        used is written to cRootCachePath and lIsDefaultPath is set
+	*                        to .F. You could check these properties and attempt to
+	*                        delete non-default paths during your application shutdown.
+	*
+	*  "chrome"              This is Chrome's default behavior. The second instance opens
+	*                        an empty Chrome browser window outside your application and
+	*                        BindToHost() returns .F. The In-App browser is not available.
+	*--------------------------------------------------------------------------------------
+	cRootCacheBehavior = "unique"
 	
 	*--------------------------------------------------------------------------------------
 	* Internal properties. Ensures that BindToHost is never called more than once per
@@ -562,6 +613,7 @@ Procedure GlobalInit (toBridge)
 	EndIf
 	This.RegisterSchemaHandlers (m.toBridge, m.loCefSettings)
 	This.SetLanguage (m.toBridge, m.loCefSettings)
+	This.CheckRootCache (m.toBridge, m.loCefSettings)
 
 	*--------------------------------------------------------------------------------------
 	* Prepare command line arguments
@@ -811,6 +863,100 @@ Procedure SetLanguage (toBridge, toCefSettings)
 	Local lcLocale
 	lcLocale = Alltrim (GetWordNum (This.cLanguages, 1, ","))
 	toBridge.SetProperty (m.toCefSettings, "Locale", m.lcLocale)
+
+*========================================================================================
+* Ensures that the root cache is unique if that is the desired behavior.
+*========================================================================================
+Procedure CheckRootCache (toBridge, toCefSettings)
+Assert .F. Message "Untested: "+Program(Program(-1)) && Untested
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.toBridge) == T_OBJECT
+		Assert Vartype (m.toCefSettings) == T_OBJECT
+	#ENDIF
+	
+	Do case
+	*--------------------------------------------------------------------------------------
+	* There's no need for us to do anything if we want Chrome's default behavior.
+	*--------------------------------------------------------------------------------------
+	Case This.cRootCacheBehavior == "chrome"
+		Return
+	
+	*--------------------------------------------------------------------------------------
+	* make sure we give each instance a unqiue folder
+	*--------------------------------------------------------------------------------------
+	Case This.cRootCacheBehavior == "unique"
+		If This.CacheIsLocked ()
+			This.CreateUniqueCache ()
+		EndIf 
+		toBridge.SetProperty (m.toCefSettings, "RootCachePath", FullPath (This.cRootCachePath))
+	
+	*--------------------------------------------------------------------------------------
+	* There's an error or a type
+	*--------------------------------------------------------------------------------------
+	Otherwise 
+		Assert .F. ASSMSG "Invalid value for cRootCacheBehavior"
+	EndCase
+
+*========================================================================================
+* Checks whether the cache is already in use by another instance.
+*========================================================================================
+Function CacheIsLocked
+
+	*--------------------------------------------------------------------------------------
+	* Determine the actual path of the root cache
+	*--------------------------------------------------------------------------------------
+	Local lcPath
+	If Empty (This.cRootCachePath)
+		lcPath = Addbs (GetEnv ("LocalAppData")) + "CEF\User Data\"
+	Else
+		lcPath = Addbs (FullPath (This.cRootCachePath))
+	EndIf
+	
+	*--------------------------------------------------------------------------------------
+	* If the lock file is missing, there's no instance locking this folder
+	*--------------------------------------------------------------------------------------
+	If Empty(Sys(2000, m.lcPath+"lockfile"))
+		Return .F.
+	EndIf
+	
+	*--------------------------------------------------------------------------------------
+	* Make sure we can open the lock file exclusively
+	*--------------------------------------------------------------------------------------
+	Local lnHandle
+	lnHandle = Fopen (m.lcPath+"lockfile", 12)
+	Fclose (m.lnHandle)
+	If m.lnHandle >= 0
+		Return .F.
+	EndIf
+	
+Return .T.
+
+*========================================================================================
+* Creates a unique folder in the TEMP folder as the root cache
+*========================================================================================
+Procedure CreateUniqueCache
+
+	*--------------------------------------------------------------------------------------
+	* We use process ID and timestamp to create a unique name
+	*--------------------------------------------------------------------------------------
+	Local lcFolder
+	lcFolder = Addbs (GetEnv ("TEMP")) ;
+		+"CEF-" + Transform(_VFP.ProcessId) + "-" + Ttoc(Datetime(),1)
+	
+	*--------------------------------------------------------------------------------------
+	* Create a folder
+	*--------------------------------------------------------------------------------------
+	MkDir (m.lcFolder)
+	
+	*--------------------------------------------------------------------------------------
+	* Assign it to the root cache property
+	*--------------------------------------------------------------------------------------
+	This.cRootCachePath = m.lcFolder
+	This.lIsDefaultPath = .F.
 
 *========================================================================================
 * This method handles a request. We're simplifying communication with the cefSharp 
