@@ -868,7 +868,6 @@ Procedure SetLanguage (toBridge, toCefSettings)
 * Ensures that the root cache is unique if that is the desired behavior.
 *========================================================================================
 Procedure CheckRootCache (toBridge, toCefSettings)
-Assert .F. Message "Untested: "+Program(Program(-1)) && Untested
 
 	*--------------------------------------------------------------------------------------
 	* Assertions
@@ -886,13 +885,22 @@ Assert .F. Message "Untested: "+Program(Program(-1)) && Untested
 		Return
 	
 	*--------------------------------------------------------------------------------------
-	* make sure we give each instance a unqiue folder
+	* Make sure we give each instance a unqiue folder. For backward compatibility we only 
+	* check this in versions that support the Chrome singleton.
 	*--------------------------------------------------------------------------------------
 	Case This.cRootCacheBehavior == "unique"
-		If This.CacheIsLocked ()
-			This.CreateUniqueCache ()
-		EndIf 
-		toBridge.SetProperty (m.toCefSettings, "RootCachePath", FullPath (This.cRootCachePath))
+		Local lnVersion
+		lnVersion = This.GetMajorVersion ()
+		If m.lnVersion >= 121
+			If This.CacheIsLocked ()
+				This.CreateUniqueCache ()
+			EndIf 
+			toBridge.SetProperty ( ;
+				 m.toCefSettings ;
+				,"RootCachePath" ;
+				,FullPath (This.cRootCachePath) ;
+			)
+	EndIf
 	
 	*--------------------------------------------------------------------------------------
 	* There's an error or a type
