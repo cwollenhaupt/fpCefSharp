@@ -603,6 +603,14 @@ Procedure GlobalInit (toBridge)
 	Local loCefSettings, loCefCommandLineArgs, lcPath
 	If m.lcVersion == "cef-bin-v65"
 		loCefSettings = toBridge.CreateInstance("CefSharp.CefSettings")
+		#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+			Assert Vartype(m.loCefSettings) == T_OBJECT
+		#ENDIF
+		#IF __DEFENSIVE_PROGRAMMING
+			If Vartype(m.loCefSettings) != T_OBJECT
+				Return .F.
+			EndIf
+		#ENDIF
 		lcPath = Addbs (This.GetCefSharpPath ())
 		loCefSettings.ResourcesDirPath = m.lcPath
 		loCefSettings.BrowserSubprocessPath = m.lcPath + "CefSharp.BrowserSubprocess.exe"
@@ -894,12 +902,14 @@ Procedure CheckRootCache (toBridge, toCefSettings)
 		If m.lnVersion >= 121
 			If This.CacheIsLocked ()
 				This.CreateUniqueCache ()
-			EndIf 
-			toBridge.SetProperty ( ;
-				 m.toCefSettings ;
-				,"RootCachePath" ;
-				,FullPath (This.cRootCachePath) ;
-			)
+			EndIf
+			If not Empty (This.cRootCachePath)
+				toBridge.SetProperty ( ;
+					 m.toCefSettings ;
+					,"RootCachePath" ;
+					,FullPath (This.cRootCachePath) ;
+				)
+			EndIf
 	EndIf
 	
 	*--------------------------------------------------------------------------------------
@@ -1481,7 +1491,7 @@ Function GetMajorVersion
 	*--------------------------------------------------------------------------------------
 	Local lcVersion, lnVersion
 	lcVersion = This.GetVersion ()
-	lnVersion = Val (StrExtract(m.lcVersion, "cef-bin-v", "."))
+	lnVersion = Val (StrExtract(m.lcVersion, "cef-bin-v", ".", 1, 2))
 
 	*--------------------------------------------------------------------------------------
 	* Check return value
