@@ -60,7 +60,8 @@ Define Class CefSharpBrowser as Custom
 		+",cef-bin-v109.1.110 vc2019/vc2022" ;
 		+",cef-bin-v114.2.100 vc2019/vc2022" ;
 		+",cef-bin-v140.1.140 vc2022" ;
-		+",cef-bin-v143.0.90 vc2022"
+		+",cef-bin-v143.0.90 vc2022" ;
+		+",cef-bin-v146.0.100 vc2022"
 	
 	*--------------------------------------------------------------------------------------
 	* Set to .T. to automatically load newer versions than the latest one supported. 
@@ -920,19 +921,31 @@ Procedure CheckRootCache (toBridge, toCefSettings)
 	EndCase
 
 *========================================================================================
-* Checks whether the cache is already in use by another instance.
+* Checks whether the cache is already in use by another instance. By default, this
+* method checks the instance own's cache. As a parameter you can pass any other cache,
+* as well. The path MUST be an absolute path.
 *========================================================================================
-Function CacheIsLocked
+Function CacheIsLocked (tcPath)
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype(m.tcPath) $ T_CHARACTER+T_OPTIONAL
+	#ENDIF
 
 	*--------------------------------------------------------------------------------------
 	* Determine the actual path of the root cache
 	*--------------------------------------------------------------------------------------
 	Local lcPath
-	If Empty (This.cRootCachePath)
+	Do case
+	Case Vartype(m.tcPath) == T_CHARACTER and not Empty(m.tcPath)
+		lcPath = m.tcPath
+	Case Empty (This.cRootCachePath)
 		lcPath = Addbs (GetEnv ("LocalAppData")) + "CEF\User Data\"
-	Else
+	Otherwise
 		lcPath = Addbs (FullPath (This.cRootCachePath))
-	EndIf
+	EndCase
 	
 	*--------------------------------------------------------------------------------------
 	* If the lock file is missing, there's no instance locking this folder
@@ -954,6 +967,31 @@ Function CacheIsLocked
 Return .T.
 
 *========================================================================================
+* Returns the path of the current cache path, if it's unlocked or an empty string
+* otherwise. If this function returns a value, it is safe to backup its content.
+*========================================================================================
+Function GetSafeCachePath
+
+	*--------------------------------------------------------------------------------------
+	* Determine the actual path of the root cache
+	*--------------------------------------------------------------------------------------
+	Local lcPath
+	If Empty (This.cRootCachePath)
+		lcPath = Addbs (GetEnv ("LocalAppData")) + "CEF\User Data\"
+	Else
+		lcPath = Addbs (FullPath (This.cRootCachePath))
+	EndIf
+
+	*--------------------------------------------------------------------------------------
+	* Check if this path is locked.
+	*--------------------------------------------------------------------------------------
+	If This.CacheIsLocked (m.lcPath)
+		lcPath = ""
+	EndIf
+	
+Return m.lcPath
+
+*========================================================================================
 * Creates a unique folder in the TEMP folder as the root cache
 *========================================================================================
 Procedure CreateUniqueCache
@@ -966,15 +1004,54 @@ Procedure CreateUniqueCache
 		+"CEF-" + Transform(_VFP.ProcessId) + "-" + Ttoc(Datetime(),1)
 	
 	*--------------------------------------------------------------------------------------
-	* Create a folder
+	* Create and initialize a folder
 	*--------------------------------------------------------------------------------------
 	MkDir (m.lcFolder)
+	This.OnCreateUniqueCache (Addbs(m.lcFolder))
 	
 	*--------------------------------------------------------------------------------------
 	* Assign it to the root cache property
 	*--------------------------------------------------------------------------------------
 	This.cRootCachePath = m.lcFolder
 	This.lIsDefaultPath = .F.
+	
+*========================================================================================
+* This method is called when fpCefSharp created a new temporary profile, because the
+* current profile is in use. By default, the user starts with a new and empty profile,
+* because nothing happens here.
+*
+* You can backup the existing profile in your application when the application launches.
+* Call GetSafeCachePath to check if an unlocked profile is available. In this case, copy
+* its content somewhere sage. When this method is called later, you can copy your 
+* backup into the specified path. The path includes the terminating backslash.
+*
+* You can also use this method to inform the user that a second profile is used in case
+* they wish to exit your application instance, instead.
+*
+* There are two ways to use this method: 
+*
+* If you use your own subclass of CefSharpBrowser in your form instead of the sample
+* ShowHtml.SCX you can simply overide this method in your subclass.
+*
+* If you are using the default class you can create an OnCreateUniqueCache method in
+* your config object.
+*========================================================================================
+Procedure OnCreateUniqueCache (tcPath)
+
+	*--------------------------------------------------------------------------------------
+	* Assertions
+	*--------------------------------------------------------------------------------------
+	#IF __DEBUGLEVEL >= __DEBUG_REGULAR
+		Assert Vartype (m.tcPath) == T_CHARACTER
+	#ENDIF
+	
+	*--------------------------------------------------------------------------------------
+	* By default we call a handler in the config object.
+	*--------------------------------------------------------------------------------------
+	If     Vartype (This.oConfig) == T_OBJECT ;
+	   and PemStatus(This.oConfig, "OnCreateUniqueCache", PEM_EXIST)
+		This.oConfig.OnCreateUniqueCache (m.tcPath)
+	EndIf
 
 *========================================================================================
 * This method handles a request. We're simplifying communication with the cefSharp 

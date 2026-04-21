@@ -7,9 +7,13 @@ rem   fox init
 rem 
 rem Currently the following commands are supported
 rem
-rem init: Call once after cloning the repository to prepare for development
+rem init: Call once after cloning the repository to prepare for development or if you
+rem       encounter problems.
 rem
-rem NOTE: Requires Windows 10 build 17063 or later
+rem release: Prepares a release
+rem
+rem NOTE: Requires Windows 10 build 17063 or later (need to run elevated) or Windows
+rem       10 build 14972 or higher (either elevated or with developer mode turned on)
 rem =====================================================================================
 setlocal
 
@@ -17,7 +21,7 @@ rem These parameters require updates whenever there is a new release. This happe
 rem automatically in the release process.
 
 rem DO NOT MODIFY - version {
-set versionCefSharp=v143.0.90
+set versionCefSharp=v146.0.100
 set versionFpCefSharp=%versionCefSharp%
 rem } - DO NOT MODIFY
 
