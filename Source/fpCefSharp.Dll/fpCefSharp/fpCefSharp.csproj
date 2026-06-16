@@ -1,22 +1,32 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <Platforms>x86</Platforms>
-    <OutputPath>$(SolutionDir)\..\CefSharpBrowser\cef-bin-v146.0.100</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- When updating the version name update the output path, as well! -->
-    <!-- Version should not include a leading 'v' so NuGet can restore correctly. -->
-    <PackageReference Include="CefSharp.WinForms" Version="146.0.100" />
+    <PackageReference Include="CefSharp.WinForms" Version="148.0.90" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
+
+  <Target Name="SetOutputPath" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <_CefSharpRef Include="@(PackageReference)" Condition="'%(Identity)' == 'CefSharp.WinForms'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_CefVersion>@(_CefSharpRef->'%(Version)')</_CefVersion>
+      <OutputPath>$(SolutionDir)\..\CefSharpBrowser\cef-bin-v$(_CefVersion)\</OutputPath>
+      <OutDir>$(SolutionDir)\..\CefSharpBrowser\cef-bin-v$(_CefVersion)\</OutDir>
+      <TargetDir>$(SolutionDir)\..\CefSharpBrowser\cef-bin-v$(_CefVersion)\</TargetDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(OutDir)" />
+  </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="call &quot;$(DevEnvDir)..\Tools\vsdevcmd.bat&quot;&#xD;&#xA;copy &quot;$(TargetDir)CefSharp.BrowserSubprocess.exe&quot; &quot;$(TargetDir)CefSharp.BrowserSubprocess.dpiunaware.exe&quot;&#xD;&#xA;mt -inputresource:&quot;$(TargetDir)CefSharp.BrowserSubprocess.exe&quot; -out:manifest.original.txt&#xD;&#xA;mt -manifest manifest.dpiunaware.txt -outputresource:&quot;$(TargetDir)CefSharp.BrowserSubprocess.dpiunaware.exe;1&quot;" />

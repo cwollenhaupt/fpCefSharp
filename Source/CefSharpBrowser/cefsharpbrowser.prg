@@ -61,7 +61,8 @@ Define Class CefSharpBrowser as Custom
 		+",cef-bin-v114.2.100 vc2019/vc2022" ;
 		+",cef-bin-v140.1.140 vc2022" ;
 		+",cef-bin-v143.0.90 vc2022" ;
-		+",cef-bin-v146.0.100 vc2022"
+		+",cef-bin-v146.0.100 vc2022" ;
+		+",cef-bin-v148.0.90 vc2022"
 	
 	*--------------------------------------------------------------------------------------
 	* Set to .T. to automatically load newer versions than the latest one supported. 
@@ -1823,6 +1824,18 @@ Procedure EventLog (tcCode, tcExtraInfo)
 		Assert not Empty (m.tcCode)
 		Assert Vartype (m.tcExtraInfo) $ T_CHARACTER+T_OPTIONAL
 	#ENDIF
+
+*========================================================================================
+* Displays Chromium developer tools in a seaprate window. Unlike Chrome the developer
+* tools are NOT shown in a panel next to the page content. This is by design.
+*========================================================================================
+Procedure ShowDeveloperTools
+
+	Local loBridge, loBrowser
+	loBridge = This.DotNet ()
+	loBrowser = loBridge.InvokeMethod (This.oChromium, "GetBrowser")	
+	loBridge.InvokeStaticMethod( ;
+		"CefSharp.WebBrowserExtensions", "ShowDevTools", m.loBrowser, null, 0, 0)
 
 *========================================================================================
 * The following methods are modified versions of the ones found in Rick Strahl's 

@@ -17,18 +17,9 @@ rem       10 build 14972 or higher (either elevated or with developer mode turne
 rem =====================================================================================
 setlocal
 
-rem These parameters require updates whenever there is a new release. This happens
-rem automatically in the release process.
-
-rem DO NOT MODIFY - version {
-set versionCefSharp=v146.0.100
-set versionFpCefSharp=%versionCefSharp%
-rem } - DO NOT MODIFY
-
 rem These values are supposed to simplify the code
 set urlGithub=https://github.com/cwollenhaupt/fpCefSharp
 set urlDownload=%urlGithub%/releases/download
-set urlRelease=%urlDownload%/%versionFpCefSharp%/fpCefSharp.%versionFpCefSharp%.zip
 set urlFpDotNet=https://github.com/cwollenhaupt/fpDotNet/releases/download/v1.0/fpDotNet.zip
 
 rem These values can be configured
@@ -72,15 +63,30 @@ if not exist "%vfp9%" (
 ) 
 
 rem =====================================================================================
+rem Fetch the latest release version from GitHub
+rem =====================================================================================
+md temp
+curl -s --ssl-no-revoke ^
+     -o temp\release_info.json ^
+     --url https://api.github.com/repos/cwollenhaupt/fpCefSharp/releases/latest
+for /f "usebackq tokens=*" %%v in (`powershell -NoProfile -Command "(Get-Content temp\release_info.json | ConvertFrom-Json).tag_name"`) do set versionFpCefSharp=%%v
+del temp\release_info.json
+if "%versionFpCefSharp%"=="" (
+   echo Failed to fetch latest release version from GitHub
+   goto :eof
+)
+set versionCefSharp=%versionFpCefSharp%
+set urlRelease=%urlDownload%/%versionFpCefSharp%/fpCefSharp.%versionFpCefSharp%.zip
+
+rem =====================================================================================
 rem Download cefSharp runtime
 rem =====================================================================================
 rem
 rem The runtime is part of the latest fpCefSharp release. Alternatively, we can build
 rem this folder with the C# project.
-rem 
+rem
 rem --location       GitHub sends a 302 Permanently Moved response
 rem --ssl-no-revoke  curl cannot check certificate revocation
-md temp
 curl --location ^
      --ssl-no-revoke ^
      --output temp/release.zip ^
@@ -148,7 +154,16 @@ mklink %~1\wwDotNetBridge.prg ^
 
 goto :eof
 
-
+rem =====================================================================================
+rem READ-CSPROJ-VERSION
+rem
+rem Reads the CefSharp version from the NuGet PackageReference in the C# project and
+rem sets versionCefSharp (with v prefix) and versionFpCefSharp.
+rem =====================================================================================
+:read-csproj-version
+for /f "usebackq tokens=*" %%v in (`powershell -NoProfile -Command "(Select-Xml -Path 'Source\fpCefSharp.Dll\fpCefSharp\fpCefSharp.csproj' -XPath '//PackageReference[@Include=''CefSharp.WinForms'']/@Version').Node.Value"`) do set versionCefSharp=v%%v
+set versionFpCefSharp=%versionCefSharp%
+goto :eof
 
 rem =====================================================================================
 rem RELEASE
@@ -160,6 +175,15 @@ rem Release does not include a build process! You must build all required files 
 rem creating a release.
 rem =====================================================================================
 :Release
+
+rem =====================================================================================
+rem Read version from CefSharp NuGet package reference in the C# project
+rem =====================================================================================
+call :read-csproj-version
+if "%versionCefSharp%"=="" (
+   echo Failed to read version from fpCefSharp.csproj
+   goto :eof
+)
 
 rem =====================================================================================
 rem Prepare Release folder. The Release folder is a transient folder that gets completely
