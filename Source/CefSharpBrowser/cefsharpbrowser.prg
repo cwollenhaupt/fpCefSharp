@@ -62,7 +62,8 @@ Define Class CefSharpBrowser as Custom
 		+",cef-bin-v140.1.140 vc2022" ;
 		+",cef-bin-v143.0.90 vc2022" ;
 		+",cef-bin-v146.0.100 vc2022" ;
-		+",cef-bin-v148.0.90 vc2022"
+		+",cef-bin-v148.0.90 vc2022" ;
+		+",cef-bin-v151.3.170 vc2022"
 	
 	*--------------------------------------------------------------------------------------
 	* Set to .T. to automatically load newer versions than the latest one supported. 
